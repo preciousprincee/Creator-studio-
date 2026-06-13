@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react'
+import { Loader2, Globe } from 'lucide-react'
 import clsx from 'clsx'
 
 export function Spinner({ text = 'Generating...', className = '' }) {
@@ -10,18 +10,42 @@ export function Spinner({ text = 'Generating...', className = '' }) {
   )
 }
 
+export function SearchingBadge({ status }) {
+  if (!status) return null
+  return (
+    <div className={clsx(
+      'inline-flex items-center gap-1.5 text-xs font-mono rounded-full px-3 py-1 border transition-all',
+      status === 'searching'
+        ? 'bg-sky-950/60 text-sky-400 border-sky-800/40 animate-pulse'
+        : 'bg-emerald-950/60 text-emerald-400 border-emerald-800/40'
+    )}>
+      <Globe size={11} />
+      {status === 'searching' ? 'Searching the web...' : 'Web data included'}
+    </div>
+  )
+}
+
+export function WebBadge({ show }) {
+  if (!show) return null
+  return (
+    <span className="inline-flex items-center gap-1 text-[10px] font-mono bg-sky-950/60 text-sky-400 border border-sky-800/40 rounded-full px-2 py-0.5">
+      <Globe size={9} /> live
+    </span>
+  )
+}
+
 export function ErrorBanner({ message, onDismiss }) {
   if (!message) return null
   const friendly =
-    message === 'NO_API_KEY' ? 'No API key found. Go to Settings and paste your Groq API key.' :
-    message === 'INVALID_KEY' ? 'Invalid Groq API key. Double-check it in Settings.' :
+    message === 'NO_API_KEY' ? 'No Groq API key found. Go to Settings (⚙️) and paste your key.' :
+    message === 'INVALID_KEY' ? 'Invalid API key. Double-check it in Settings.' :
     message
 
   return (
     <div className="flex items-start gap-3 bg-red-950/60 border border-red-800/50 rounded-xl px-4 py-3 text-sm text-red-300">
-      <span>⚠️</span>
+      <span className="shrink-0">⚠️</span>
       <span className="flex-1">{friendly}</span>
-      {onDismiss && <button onClick={onDismiss} className="text-red-500 hover:text-red-300 ml-2">✕</button>}
+      {onDismiss && <button onClick={onDismiss} className="text-red-500 hover:text-red-300 ml-2 shrink-0">✕</button>}
     </div>
   )
 }

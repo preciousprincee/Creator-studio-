@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Settings as SettingsIcon } from 'lucide-react'
 import { useCreator } from './hooks/useCreator'
-import { getApiKey } from './lib/groq'
+import { getApiKey, getTavilyKey } from './lib/groq'
 import Home from './components/Home'
 import Quiz from './components/Quiz'
 import Describe from './components/Describe'
@@ -9,16 +9,16 @@ import Ideas from './components/Ideas'
 import Research from './components/Research'
 import Settings from './components/Settings'
 
-// screens: home | quiz | describe | ideas | research | settings
 export default function App() {
   const [screen, setScreen] = useState('home')
   const [prevScreen, setPrevScreen] = useState('home')
-  const [path, setPath] = useState(null) // 'quiz' | 'describe'
+  const [path, setPath] = useState(null)
 
   const {
     ideas, selectedIdea, setSelectedIdea,
     research, script,
     loadingIdeas, loadingResearch, loadingScript,
+    searchStatus, webSearchUsed,
     error, clearError,
     generateIdeasFromQuiz, generateIdeasFromDescription,
     generateResearch, generateScript,
@@ -26,11 +26,10 @@ export default function App() {
   } = useCreator()
 
   function go(s) { setPrevScreen(screen); setScreen(s) }
-
   function goHome() { reset(); setPath(null); setScreen('home') }
 
-  // No key warning banner
-  const hasKey = !!getApiKey()
+  const hasGroqKey = !!getApiKey()
+  const hasTavilyKey = !!getTavilyKey()
 
   async function handleQuizSubmit(data) {
     await generateIdeasFromQuiz(data)
@@ -49,25 +48,26 @@ export default function App() {
   }
 
   function handleRegenerate() {
-    if (path === 'quiz') setScreen('quiz')
-    else setScreen('describe')
+    setScreen(path === 'quiz' ? 'quiz' : 'describe')
   }
 
   return (
     <div className="min-h-screen bg-[#06060f]">
-      {/* Top nav */}
+      {/* Nav */}
       <nav className="sticky top-0 z-50 border-b border-[#1e1e35] bg-[#06060f]/90 backdrop-blur-md">
         <div className="max-w-xl mx-auto px-4 h-14 flex items-center justify-between">
-          <button
-            onClick={goHome}
-            className="font-display font-extrabold text-lg bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent"
-          >
+          <button onClick={goHome} className="font-display font-extrabold text-lg bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">
             Creator Studio
           </button>
-          <div className="flex items-center gap-3">
-            {!hasKey && screen !== 'settings' && (
+          <div className="flex items-center gap-2">
+            {!hasGroqKey && screen !== 'settings' && (
               <span className="text-[11px] font-mono text-amber-500 bg-amber-950/40 border border-amber-800/40 rounded-full px-2.5 py-0.5">
                 No API key
+              </span>
+            )}
+            {hasGroqKey && hasTavilyKey && screen !== 'settings' && (
+              <span className="text-[11px] font-mono text-sky-500 bg-sky-950/40 border border-sky-800/40 rounded-full px-2.5 py-0.5">
+                🌐 Web search on
               </span>
             )}
             <button
@@ -80,11 +80,8 @@ export default function App() {
         </div>
       </nav>
 
-      {/* Screens */}
       <main>
-        {screen === 'settings' && (
-          <Settings onBack={() => go(prevScreen)} />
-        )}
+        {screen === 'settings' && <Settings onBack={() => go(prevScreen)} />}
 
         {screen === 'home' && (
           <Home
@@ -94,23 +91,11 @@ export default function App() {
         )}
 
         {screen === 'quiz' && (
-          <Quiz
-            onBack={goHome}
-            onSubmit={handleQuizSubmit}
-            loading={loadingIdeas}
-            error={error}
-            onClearError={clearError}
-          />
+          <Quiz onBack={goHome} onSubmit={handleQuizSubmit} loading={loadingIdeas} error={error} onClearError={clearError} />
         )}
 
         {screen === 'describe' && (
-          <Describe
-            onBack={goHome}
-            onSubmit={handleDescribeSubmit}
-            loading={loadingIdeas}
-            error={error}
-            onClearError={clearError}
-          />
+          <Describe onBack={goHome} onSubmit={handleDescribeSubmit} loading={loadingIdeas} error={error} onClearError={clearError} />
         )}
 
         {screen === 'ideas' && (
@@ -123,6 +108,8 @@ export default function App() {
             onContinue={handleResearch}
             loading={loadingIdeas}
             loadingResearch={loadingResearch}
+            searchStatus={searchStatus}
+            webSearchUsed={webSearchUsed}
           />
         )}
 
@@ -135,6 +122,8 @@ export default function App() {
             onGenerateScript={() => generateScript(selectedIdea)}
             loading={loadingResearch}
             loadingScript={loadingScript}
+            searchStatus={searchStatus}
+            webSearchUsed={webSearchUsed}
           />
         )}
       </main>

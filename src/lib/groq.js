@@ -1,8 +1,43 @@
 const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions'
+const TAVILY_API = 'https://api.tavily.com/search'
 const MODEL = 'llama3-70b-8192'
 
 export function getApiKey() {
   return localStorage.getItem('groq_api_key') || import.meta.env.VITE_GROQ_API_KEY || ''
+}
+
+export function getTavilyKey() {
+  return localStorage.getItem('tavily_api_key') || import.meta.env.VITE_TAVILY_API_KEY || ''
+}
+
+export async function webSearch(query, maxResults = 5) {
+  const apiKey = getTavilyKey()
+  if (!apiKey) return null // silently skip if no key
+
+  try {
+    const res = await fetch(TAVILY_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: apiKey,
+        query,
+        search_depth: 'basic',
+        max_results: maxResults,
+        include_answer: true,
+        include_raw_content: false,
+      }),
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    // Return a compact summary string for injection into prompts
+    const snippets = (data.results || [])
+      .map(r => `[${r.title}]: ${r.content?.slice(0, 300)}`)
+      .join('\n')
+    const answer = data.answer ? `Summary: ${data.answer}\n\n` : ''
+    return answer + snippets
+  } catch {
+    return null
+  }
 }
 
 export async function groqChat(messages, systemPrompt = '') {
@@ -18,7 +53,7 @@ export async function groqChat(messages, systemPrompt = '') {
     body: JSON.stringify({
       model: MODEL,
       temperature: 0.85,
-      max_tokens: 1200,
+      max_tokens: 1400,
       messages: [
         ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
         ...messages,
