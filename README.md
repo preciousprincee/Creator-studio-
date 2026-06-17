@@ -1,21 +1,20 @@
-# 🎬 Creator Studio
+# ✦ Aria — Your Personal Content Strategist
 
-AI-powered content strategy tool for TikTok & Instagram Reels creators.
-
-## Stack
-- **React + Vite** — fast dev and build
-- **Tailwind CSS** — utility-first styling
-- **Groq API** (llama3-70b-8192) — ultra-fast AI inference
+An AI-powered personal content strategist for TikTok & Instagram Reels creators. Built with React + Vite, Tailwind CSS, and Groq API.
 
 ## Features
-- 🧠 Quiz path — answer 3 questions, get tailored ideas
-- 💡 Describe path — know your niche, need fresh ideas
-- 🤖 AI-suggested best content format per idea (with reasoning)
-- 🔥 Content research — trends, hooks, sounds, posting tips, competitor angles
-- ✍️ Script generator — Hook → Body → CTA format
-- ⚙️ In-app settings — paste your Groq key, no `.env` needed
+- 🎨 **Guided onboarding** — Aria collects your profile across 8 friendly steps
+- 💾 **Persistent sessions** — your profile & strategy survive page refreshes (localStorage)
+- 📈 **Full strategy dashboard** — Brand Voice, Growth Strategy, Content Calendar, Ideas, Tips
+- ✍️ **Script generator** — per-idea Hook → Body → CTA scripts
+- 🌐 **Live web search** — real-time trends via Tavily API (optional)
+- ⚙️ **In-app settings** — paste your API keys, no .env needed
 
----
+## Stack
+- React 18 + Vite
+- Tailwind CSS (warm, approachable design system)
+- Groq API — llama3-70b-8192
+- Tavily API — optional web search
 
 ## Local Development
 
@@ -24,57 +23,42 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173, go to Settings (⚙️ top right) and paste your Groq API key.
+Open http://localhost:5173, click ⚙️ → paste your Groq key → Test & Save.
 
-Get a free Groq key at https://console.groq.com
-
----
+Get a free Groq key at https://console.groq.com  
+Get a free Tavily key at https://tavily.com (optional, enables live trend search)
 
 ## Deploy to Vercel
 
-### Option A — Vercel CLI
 ```bash
-npm i -g vercel
-vercel
+# Option A — CLI
+npm i -g vercel && vercel
+
+# Option B — Dashboard
+# Push to GitHub → vercel.com/new → import repo
+# Framework: Vite | Build: npm run build | Output: dist
 ```
 
-### Option B — Vercel Dashboard
-1. Push this project to GitHub
-2. Go to https://vercel.com/new
-3. Import the repo
-4. Framework: **Vite**
-5. Build command: `npm run build`
-6. Output dir: `dist`
-7. Click **Deploy**
+`vercel.json` in the root handles SPA routing automatically.
 
-> The `vercel.json` in the root handles SPA routing automatically.
+### Optional env vars (if you prefer not to use in-app settings)
+```
+VITE_GROQ_API_KEY=gsk_...
+VITE_TAVILY_API_KEY=tvly-...
+```
 
-### Optional: Set API key as env variable
-If you want the key baked in (not recommended for public deploys):
-1. In Vercel dashboard → Settings → Environment Variables
-2. Add `VITE_GROQ_API_KEY` = your key
-
-Otherwise users paste their own key in the Settings screen.
-
----
+## Data & Privacy
+All user data (profile, strategy, API keys) is stored in **localStorage only** — never sent to any server other than Groq/Tavily directly from the browser.
 
 ## Project Structure
-
 ```
 src/
-├── lib/
-│   └── groq.js          # Groq API client + JSON parser
-├── hooks/
-│   └── useCreator.js    # Central state + all AI calls
+├── lib/groq.js              # Groq + Tavily API clients
+├── hooks/useCreator.js      # All AI calls + state
 ├── components/
-│   ├── UI.jsx           # Shared: Spinner, Tag, ErrorBanner, etc.
-│   ├── Home.jsx         # Landing / path selector
-│   ├── Quiz.jsx         # Quiz flow (niche → audience → goal)
-│   ├── Describe.jsx     # Description flow (niche + context)
-│   ├── Ideas.jsx        # Idea cards + format suggestions
-│   ├── Research.jsx     # Research panel + script generator
-│   └── Settings.jsx     # API key management
-├── App.jsx              # Root + screen navigation
-├── main.jsx
-└── index.css            # Tailwind + base styles
+│   ├── UI.jsx               # Design system components
+│   ├── Onboarding.jsx       # 8-step profile collection
+│   ├── Dashboard.jsx        # Strategy dashboard (6 tabs)
+│   └── Settings.jsx         # API key management
+└── App.jsx                  # Session restore + routing
 ```
