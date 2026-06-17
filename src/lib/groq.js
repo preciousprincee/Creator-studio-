@@ -1,6 +1,6 @@
 const GROQ_API   = 'https://api.groq.com/openai/v1/chat/completions'
 const TAVILY_API = 'https://api.tavily.com/search'
-const MODEL      = 'llama3-70b-8192'
+const MODEL = 'llama-3.3-70b-versatile'
 
 export const getApiKey    = () => localStorage.getItem('groq_api_key')    || import.meta.env.VITE_GROQ_API_KEY    || ''
 export const getTavilyKey = () => localStorage.getItem('tavily_api_key')  || import.meta.env.VITE_TAVILY_API_KEY  || ''
