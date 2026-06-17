@@ -11,10 +11,18 @@ export default {
       },
       colors: {
         cream: { 50:'#fdfaf5', 100:'#faf4e8', 200:'#f5ebd4', 300:'#edd9b8' },
-        terra: { 100:'#fce8df', 200:'#f8cfc0', 300:'#f0a98f', 400:'#e07a5f', 500:'#c95f43', 600:'#a8432a' },
+        terra: {
+          100:'#fce8df', 200:'#f8cfc0', 300:'#f0a98f',
+          400:'#e07a5f', 500:'#c95f43', 600:'#a8432a',
+          700:'#8a3320', 800:'#6e2518', 900:'#4f180e',
+        },
         sage:  { 100:'#e8f0eb', 200:'#ccddd2', 300:'#a4c4ae', 400:'#6fa880', 500:'#4a8a5d', 600:'#326944' },
         sand:  { 100:'#f5f0e8', 200:'#ede4d0', 300:'#d9c9a8', 400:'#c2a97a', 500:'#a6884e' },
-        ink:   { 900:'#1c1612', 800:'#2e2720', 700:'#44392e', 600:'#5c4d40', 500:'#7a6655', 400:'#9e8872', 300:'#c4b09a', 200:'#ddd0bf' },
+        ink:   {
+          200:'#ddd0bf', 300:'#c4b09a', 400:'#9e8872',
+          500:'#7a6655', 600:'#5c4d40', 700:'#44392e',
+          800:'#2e2720', 900:'#1c1612',
+        },
       },
       borderRadius: { '2xl':'1rem', '3xl':'1.5rem', '4xl':'2rem' },
       boxShadow: {
@@ -34,5 +42,10 @@ export default {
       },
     },
   },
+  // Safelist all custom color shades used in dark: variants so PurgeCSS keeps them
+  safelist: [
+    { pattern: /^(bg|text|border|ring)-(terra|sage|sand|ink|cream)-(100|200|300|400|500|600|700|800|900)$/ },
+    { pattern: /^dark:(bg|text|border|ring)-(terra|sage|sand|ink|gray)-(100|200|300|400|500|600|700|800|900)(\/\d+)?$/ },
+  ],
   plugins: [],
 }
