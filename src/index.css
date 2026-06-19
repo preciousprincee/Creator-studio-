@@ -5,14 +5,20 @@
 @layer base {
   html { background: #fdfaf5; }
   html.dark { background: #030712; }
-  body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    @apply text-ink-900 dark:text-gray-100;
+    background-color: #fdfaf5;
+  }
+  .dark body { background-color: #030712; }
   * { scrollbar-width: thin; scrollbar-color: #d9c9a8 #f5ebd4; }
   .dark * { scrollbar-color: #374151 #111827; }
   *::-webkit-scrollbar { width: 5px; }
   *::-webkit-scrollbar-track { background: #f5ebd4; }
   .dark *::-webkit-scrollbar-track { background: #111827; }
   *::-webkit-scrollbar-thumb { background: #d9c9a8; border-radius: 10px; }
-  .dark *::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
+  .dark *::-webkit-scrollbar-thumb { background: #374151; }
 }
 
 @layer components {
@@ -22,54 +28,141 @@
            disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98];
   }
   .btn-secondary {
-    @apply bg-cream-100 hover:bg-cream-200 dark:bg-gray-800 dark:hover:bg-gray-700
-           text-ink-700 dark:text-gray-200 font-semibold rounded-2xl px-6 py-3 text-sm
-           border border-cream-300 dark:border-gray-600 transition-all duration-200
+    @apply font-semibold rounded-2xl px-6 py-3 text-sm transition-all duration-200
            disabled:opacity-40 active:scale-[0.98];
+    background-color: #faf4e8;
+    color: #44392e;
+    border: 1px solid #edd9b8;
   }
+  .dark .btn-secondary {
+    background-color: #1f2937;
+    color: #e5e7eb;
+    border-color: #374151;
+  }
+  .btn-secondary:hover { background-color: #f5ebd4; }
+  .dark .btn-secondary:hover { background-color: #374151; }
+
+  /* card uses explicit CSS so dark: opacity modifiers never interfere */
   .card {
-    @apply bg-white dark:bg-gray-900 rounded-3xl shadow-warm border border-cream-200 dark:border-gray-800;
+    background-color: #ffffff;
+    border-radius: 1.5rem;
+    border: 1px solid #f5ebd4;
+    box-shadow: 0 4px 16px rgba(100,70,40,0.10), 0 1px 4px rgba(100,70,40,0.06);
+  }
+  .dark .card {
+    background-color: #111827;
+    border-color: #1f2937;
+    box-shadow: none;
   }
   .card-soft {
-    @apply bg-cream-50 dark:bg-gray-900 rounded-3xl border border-cream-200 dark:border-gray-800;
+    border-radius: 1.5rem;
+    border: 1px solid #f5ebd4;
+    background-color: #fdfaf5;
   }
+  .dark .card-soft {
+    background-color: #111827;
+    border-color: #1f2937;
+  }
+
+  /* sticky header — plain rgba avoids Tailwind opacity-modifier issues */
+  .header-bg {
+    background-color: rgba(253,250,245,0.97);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .dark .header-bg {
+    background-color: rgba(3,7,18,0.97);
+  }
+
   .input {
-    @apply bg-white dark:bg-gray-800 border border-cream-300 dark:border-gray-600
-           focus:border-terra-400 rounded-2xl px-4 py-3 text-sm
-           text-ink-800 dark:text-gray-200 placeholder-ink-300 dark:placeholder-gray-600
-           outline-none transition-all duration-200 w-full;
+    background-color: #ffffff;
+    border: 1px solid #edd9b8;
+    border-radius: 1rem;
+    padding: 12px 16px;
+    font-size: 0.875rem;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+    @apply text-ink-800 placeholder-ink-300;
   }
+  .dark .input {
+    background-color: #1f2937;
+    border-color: #374151;
+    @apply text-gray-200 placeholder-gray-600;
+  }
+  .input:focus { border-color: #e07a5f; }
+  .dark .input:focus { border-color: #c95f43; }
+
   .label-tag {
     @apply text-[10px] font-mono uppercase tracking-widest text-ink-400 dark:text-gray-500;
   }
   .chip {
-    @apply px-3 py-1.5 rounded-full text-sm border cursor-pointer transition-all duration-150 select-none;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    background-color: #ffffff;
+    border-color: #edd9b8;
+    color: #5c4d40;
   }
-  .chip-idle {
-    @apply bg-white dark:bg-gray-800 border-cream-300 dark:border-gray-600
-           text-ink-600 dark:text-gray-300 hover:border-terra-300 hover:text-terra-500;
+  .dark .chip {
+    background-color: #1f2937;
+    border-color: #374151;
+    color: #d1d5db;
   }
-  .chip-active {
-    @apply bg-terra-100 border-terra-300 text-terra-600 dark:bg-terra-900 dark:border-terra-600 dark:text-terra-300 font-medium;
+  .chip:hover { border-color: #f0a98f; color: #c95f43; }
+  .chip.active {
+    background-color: #fce8df;
+    border-color: #f0a98f;
+    color: #a8432a;
+    font-weight: 500;
   }
+  .dark .chip.active {
+    background-color: #4f180e;
+    border-color: #8a3320;
+    color: #f0a98f;
+  }
+
   .aria-bubble {
-    @apply bg-white dark:bg-gray-800 border border-cream-200 dark:border-gray-700
-           rounded-3xl rounded-tl-sm px-5 py-4 shadow-warm-sm
-           text-ink-700 dark:text-gray-300 text-sm leading-relaxed;
+    background-color: #ffffff;
+    border: 1px solid #f5ebd4;
+    border-radius: 1.5rem;
+    border-top-left-radius: 0.25rem;
+    padding: 16px 20px;
+    box-shadow: 0 1px 3px rgba(100,70,40,0.08);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    @apply text-ink-700;
   }
-  .tab-active {
-    @apply bg-terra-400 text-white shadow-warm-sm;
+  .dark .aria-bubble {
+    background-color: #1f2937;
+    border-color: #374151;
+    @apply text-gray-300;
   }
-  .tab-idle {
-    @apply text-ink-500 dark:text-gray-400 hover:text-ink-800 dark:hover:text-gray-200 hover:bg-cream-100 dark:hover:bg-gray-800;
-  }
+
+  .tab-active  { @apply bg-terra-400 text-white; box-shadow: 0 1px 3px rgba(100,70,40,0.15); }
+  .tab-idle    { @apply text-ink-500 dark:text-gray-400 hover:text-ink-700 dark:hover:text-gray-200; }
+  .dark .tab-idle:hover { background-color: #1f2937; }
+  .tab-idle:hover { background-color: #faf4e8; }
 }
 
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  @keyframes dotTyping {
-    0%,100% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; }
-  }
-  .dot-typing::after { content: '.'; animation: dotTyping 1s steps(1) infinite; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes bounceSoft { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  @keyframes dotTyping { 0%,100%{content:'.'} 33%{content:'..'} 66%{content:'...'} }
+  .animate-fade-up { animation: fadeUp 0.45s ease forwards; }
+  .animate-fade-in { animation: fadeIn 0.3s ease forwards; }
+  .animate-bounce-soft { animation: bounceSoft 1.4s ease-in-out infinite; }
+  .animate-spin { animation: spin 0.8s linear infinite; }
+  .dot-typing::after { content:'.'; animation: dotTyping 1s steps(1) infinite; }
+  .shadow-warm-sm { box-shadow: 0 1px 3px rgba(100,70,40,0.08),0 1px 2px rgba(100,70,40,0.06); }
+  .shadow-warm    { box-shadow: 0 4px 16px rgba(100,70,40,0.10),0 1px 4px rgba(100,70,40,0.06); }
+  .shadow-warm-lg { box-shadow: 0 8px 32px rgba(100,70,40,0.12),0 2px 8px rgba(100,70,40,0.08); }
 }

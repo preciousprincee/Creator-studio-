@@ -20,15 +20,19 @@ export default function App() {
   const [dark,       setDark]       = useState(getInitialDark)
 
   const {
-    profile, strategy, loading, error, webUsed,
-    scripts, loadingNewIdeas,
+    profile, strategy, competitors, loading, loadingCompetitors,
+    loadingNewIdeas, error, webUsed, scripts,
     setError, restoreSession, reset,
-    generateStrategy, generateScript, generateNewIdeas,
+    generateStrategy, generateScript, generateNewIdeas, generateCompetitors,
   } = useCreator()
 
-  // Sync dark mode class on <html>
+  // Apply dark class to <html> — the only place we need to set it
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark)
+    if (dark) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
     try { localStorage.setItem('aria_dark_mode', String(dark)) } catch {}
   }, [dark])
 
@@ -43,7 +47,7 @@ export default function App() {
     }
   }, []) // eslint-disable-line
 
-  // KEY FIX: switch to dashboard when strategy is set (catches async edge cases)
+  // Switch screen as soon as strategy is set
   useEffect(() => {
     if (strategy && screen === 'onboarding') {
       setScreen('dashboard')
@@ -52,95 +56,89 @@ export default function App() {
 
   async function handleOnboardingComplete(formData) {
     await generateStrategy(formData)
-    // screen transition handled by the useEffect above
   }
 
-  function handleReset() {
-    clearSaved()
-    reset()
-    setScreen('onboarding')
-  }
-
-  function goSettings()       { setPrevScreen(screen); setScreen('settings') }
+  function handleReset() { clearSaved(); reset(); setScreen('onboarding') }
+  function goSettings()   { setPrevScreen(screen); setScreen('settings') }
   function backFromSettings() { setScreen(prevScreen) }
 
-  const hasGroqKey   = !!getApiKey()
-  const hasTavilyKey = !!getTavilyKey()
+  const hasKey     = !!getApiKey()
+  const hasWebKey  = !!getTavilyKey()
 
-  if (screen === 'loading') {
-    return (
-      <div className="min-h-screen bg-cream-50 dark:bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-terra-200 to-sand-300 shadow-warm flex items-center justify-center text-3xl font-display mx-auto mb-3 animate-bounce-soft">✦</div>
-          <p className="text-ink-400 dark:text-gray-500 text-sm font-mono">Restoring your session…</p>
-        </div>
+  if (screen === 'loading') return (
+    <div style={{minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center',
+      background: dark ? '#030712' : '#fdfaf5'}}>
+      <div style={{textAlign:'center'}}>
+        <div style={{width:56, height:56, borderRadius:'50%', background:'linear-gradient(135deg,#f8cfc0,#d9c9a8)',
+          display:'flex', alignItems:'center', justifyContent:'center', fontSize:28, margin:'0 auto 12px',
+          animation:'bounceSoft 1.4s ease-in-out infinite'}}>✦</div>
+        <p style={{color: dark ? '#6b7280' : '#9e8872', fontSize:14, fontFamily:'monospace'}}>Restoring session…</p>
       </div>
-    )
-  }
+    </div>
+  )
 
   return (
-    <div className="min-h-screen bg-cream-50 dark:bg-gray-950 transition-colors duration-300">
+    <div style={{minHeight:'100vh', background: dark ? '#030712' : '#fdfaf5', transition:'background 0.3s'}}>
 
-      {/* Floating controls — only shown when NOT on settings screen, positioned to not overlap header */}
+      {/* Floating toolbar — ONLY dark/settings buttons. "New profile" lives inside Dashboard header */}
       {screen !== 'settings' && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
-          {!hasGroqKey && (
-            <button onClick={goSettings} className="hidden sm:inline text-[11px] font-mono text-terra-600 dark:text-terra-400 bg-terra-100 dark:bg-terra-900 border border-terra-200 dark:border-terra-800 rounded-full px-2.5 py-1 hover:bg-terra-200 transition-colors">
+        <div style={{position:'fixed', top:16, right:16, zIndex:50, display:'flex', alignItems:'center', gap:8}}>
+          {!hasKey && (
+            <button onClick={goSettings}
+              style={{fontSize:11, fontFamily:'monospace', borderRadius:999, padding:'4px 10px', cursor:'pointer',
+                background: dark?'#4f180e':'#fce8df', border: `1px solid ${dark?'#8a3320':'#f0a98f'}`,
+                color: dark?'#f0a98f':'#a8432a'}}>
               Add API key ↗
             </button>
           )}
-          {hasGroqKey && hasTavilyKey && (
-            <span className="hidden sm:inline text-[10px] font-mono text-sage-600 dark:text-sage-400 bg-sage-100 dark:bg-sage-900 border border-sage-200 dark:border-sage-800 rounded-full px-2.5 py-1">
+          {hasKey && hasWebKey && (
+            <span style={{fontSize:10, fontFamily:'monospace', borderRadius:999, padding:'4px 10px',
+              background: dark?'#0f2318':'#e8f0eb', border:`1px solid ${dark?'#326944':'#ccddd2'}`,
+              color: dark?'#a4c4ae':'#326944'}}>
               🌐 web on
             </span>
           )}
-          <button
-            onClick={() => setDark(d => !d)}
-            title={dark ? 'Light mode' : 'Dark mode'}
-            className="w-9 h-9 rounded-xl bg-white dark:bg-gray-800 border border-cream-300 dark:border-gray-700 shadow-warm-sm flex items-center justify-center text-ink-400 dark:text-gray-400 hover:text-ink-700 dark:hover:text-gray-200 transition-all"
-          >
+          <button onClick={() => setDark(d => !d)}
+            title={dark?'Light mode':'Dark mode'}
+            style={{width:36, height:36, borderRadius:12, cursor:'pointer', display:'flex',
+              alignItems:'center', justifyContent:'center', transition:'all 0.2s',
+              background: dark?'#1f2937':'#ffffff', border:`1px solid ${dark?'#374151':'#edd9b8'}`,
+              color: dark?'#9ca3af':'#9e8872', boxShadow:'0 1px 3px rgba(100,70,40,0.1)'}}>
             {dark ? <Sun size={15}/> : <Moon size={15}/>}
           </button>
-          <button
-            onClick={goSettings}
-            className="w-9 h-9 rounded-xl bg-white dark:bg-gray-800 border border-cream-300 dark:border-gray-700 shadow-warm-sm flex items-center justify-center text-ink-400 dark:text-gray-400 hover:text-ink-700 dark:hover:text-gray-200 transition-all"
-          >
+          <button onClick={goSettings}
+            style={{width:36, height:36, borderRadius:12, cursor:'pointer', display:'flex',
+              alignItems:'center', justifyContent:'center', transition:'all 0.2s',
+              background: dark?'#1f2937':'#ffffff', border:`1px solid ${dark?'#374151':'#edd9b8'}`,
+              color: dark?'#9ca3af':'#9e8872', boxShadow:'0 1px 3px rgba(100,70,40,0.1)'}}>
             <SettingsIcon size={15}/>
           </button>
         </div>
       )}
 
-      {screen === 'settings' && <Settings onBack={backFromSettings} />}
+      {screen === 'settings' && <Settings onBack={backFromSettings} dark={dark} />}
 
       {screen === 'onboarding' && (
-        <Onboarding
-          onComplete={handleOnboardingComplete}
-          loading={loading}
-          error={error}
-          onClearError={() => setError(null)}
-        />
+        <Onboarding onComplete={handleOnboardingComplete} loading={loading}
+          error={error} onClearError={()=>setError(null)} />
       )}
 
       {screen === 'dashboard' && profile && strategy && (
         <Dashboard
-          profile={profile}
-          strategy={strategy}
-          webUsed={webUsed}
-          onReset={handleReset}
-          generateScript={generateScript}
-          generateNewIdeas={generateNewIdeas}
-          scripts={scripts}
-          loadingNewIdeas={loadingNewIdeas}
+          profile={profile} strategy={strategy} competitors={competitors}
+          webUsed={webUsed} onReset={handleReset} scripts={scripts}
+          loadingNewIdeas={loadingNewIdeas} loadingCompetitors={loadingCompetitors}
+          generateScript={generateScript} generateNewIdeas={generateNewIdeas}
+          generateCompetitors={generateCompetitors}
         />
       )}
 
-      {/* Fallback: dashboard screen but data missing */}
       {screen === 'dashboard' && (!profile || !strategy) && (
-        <div className="min-h-screen flex items-center justify-center px-4">
-          <div className="text-center max-w-sm">
-            <div className="text-4xl mb-4">😕</div>
-            <p className="font-display text-xl text-ink-800 dark:text-gray-200 mb-2">Couldn't load session</p>
-            <p className="text-ink-500 dark:text-gray-400 text-sm mb-6">Let's start fresh.</p>
+        <div style={{minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:24}}>
+          <div style={{textAlign:'center', maxWidth:320}}>
+            <div style={{fontSize:40, marginBottom:16}}>😕</div>
+            <p className="font-display text-xl text-ink-800 dark:text-gray-200" style={{marginBottom:8}}>Session couldn't load</p>
+            <p className="text-ink-500 dark:text-gray-400 text-sm" style={{marginBottom:24}}>Let's start fresh.</p>
             <button onClick={handleReset} className="btn-primary">Start over</button>
           </div>
         </div>

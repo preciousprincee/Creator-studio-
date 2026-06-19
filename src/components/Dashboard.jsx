@@ -1,99 +1,201 @@
 import { useState } from 'react'
-import { RotateCcw, Copy, Check, RefreshCw } from 'lucide-react'
+import { RotateCcw, Copy, Check, RefreshCw, Users } from 'lucide-react'
 import { AriaAvatar, AriaSays, SectionCard, PotentialBadge, PriorityBadge, WebBadge, Spinner } from './UI'
 import clsx from 'clsx'
 
-const FORMAT_EMOJI = { 'Face to Camera':'🎤','Text on Screen + Music':'✍️','Voiceover + B-roll':'🎙️','Tutorial':'📋','POV / Skit':'🎭','Trend':'🔥' }
-const DAY_COLORS   = ['bg-terra-100 text-terra-700','bg-sage-100 text-sage-700','bg-sand-100 text-sand-700','bg-cream-200 text-ink-600','bg-terra-100 text-terra-700','bg-sage-100 text-sage-700','bg-cream-100 text-ink-500']
+const FORMAT_EMOJI = {'Face to Camera':'🎤','Text on Screen + Music':'✍️','Voiceover + B-roll':'🎙️','Tutorial':'📋','POV / Skit':'🎭','Trend':'🔥','optional':''}
+const DAY_BG = ['#fce8df','#e8f0eb','#f5f0e8','#f5ebd4','#fce8df','#e8f0eb','#faf4e8']
+const DAY_CO = ['#a8432a','#326944','#a6884e','#7a6655','#a8432a','#326944','#9e8872']
 
-function CopyButton({ text }) {
+function CopyBtn({ text }) {
   const [copied, setCopied] = useState(false)
-  function doCopy() {
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(()=>setCopied(false), 2000)
-  }
   return (
-    <button onClick={doCopy} className="btn-primary py-2.5 flex-1 text-xs flex items-center justify-center gap-1.5">
+    <button onClick={()=>{navigator.clipboard.writeText(text);setCopied(true);setTimeout(()=>setCopied(false),2000)}}
+      className="btn-primary text-xs flex items-center justify-center gap-1.5 w-full py-2.5">
       {copied ? <><Check size={13}/> Copied!</> : <><Copy size={13}/> Copy Script</>}
     </button>
   )
 }
 
-function ScriptPanel({ ideaTitle, scriptState, onGenerate }) {
-  if (!scriptState && !ideaTitle) return null
+function ScriptPanel({ scriptState, onGenerate }) {
   const { loading, data, error } = scriptState || {}
-
+  if (!scriptState) return (
+    <div className="mt-4 pt-4" style={{borderTop:'1px solid #f5ebd4'}}>
+      <button onClick={onGenerate} className="btn-primary w-full py-2.5 text-sm">✍️ Generate Full Script</button>
+    </div>
+  )
   return (
-    <div className="mt-4 border-t border-cream-200 dark:border-gray-700 pt-4">
-      {!scriptState && (
-        <button onClick={onGenerate} className="btn-primary w-full py-2.5 text-sm">
-          ✍️ Generate Full Script
-        </button>
-      )}
-      {loading && (
-        <div className="flex justify-center py-4"><Spinner text="Writing your script…" size="sm" /></div>
-      )}
-      {error && (
-        <div className="text-center py-3">
-          <p className="text-red-500 text-sm mb-2">Script failed to generate.</p>
-          <button onClick={onGenerate} className="btn-secondary py-2 px-4 text-xs">Try again</button>
-        </div>
-      )}
+    <div className="mt-4 pt-4 space-y-3" style={{borderTop:'1px solid #f5ebd4'}}>
+      {loading && <div className="flex justify-center py-3"><Spinner text="Writing your script…" size="sm"/></div>}
+      {error && <div className="text-center py-2"><p className="text-sm mb-2" style={{color:'#ef4444'}}>Failed. <button onClick={onGenerate} className="underline">Retry</button></p></div>}
       {data && (
-        <div className="space-y-3 animate-fade-in">
-          <div className="flex items-center justify-between mb-2">
-            <p className="label-tag text-terra-500">✍️ Script · <span className="font-mono">{data.duration}</span></p>
-            <button onClick={onGenerate} className="text-xs text-ink-400 dark:text-gray-500 hover:text-ink-600 flex items-center gap-1">
+        <div className="space-y-2.5 animate-fade-in">
+          <div className="flex items-center justify-between">
+            <p className="label-tag" style={{color:'#c95f43'}}>✍️ Script · {data.duration}</p>
+            <button onClick={onGenerate} className="text-xs flex items-center gap-1 hover:opacity-70" style={{color:'#9e8872'}}>
               <RefreshCw size={11}/> Redo
             </button>
           </div>
 
-          <div className="rounded-2xl p-3.5 border border-terra-200 dark:border-terra-800 bg-terra-50 dark:bg-terra-950">
-            <p className="label-tag mb-1.5 text-terra-500">🎬 Hook — First 3 seconds</p>
-            <p className="text-ink-800 dark:text-gray-200 text-sm font-semibold leading-relaxed">"{data.hook}"</p>
+          {/* Hook */}
+          <div className="rounded-2xl p-3.5" style={{background:'#fce8df',border:'1px solid #f0a98f'}}>
+            <p className="label-tag mb-1" style={{color:'#c95f43'}}>🎬 Hook — First 3 seconds</p>
+            <p className="text-sm font-bold leading-relaxed" style={{color:'#2e2720'}}>"{data.hook}"</p>
           </div>
 
-          <div className="rounded-2xl p-3.5 border border-cream-200 dark:border-gray-700 bg-cream-50 dark:bg-gray-800">
-            <p className="label-tag mb-2">📢 Body</p>
-            {data.body?.map((pt, i) => (
-              <div key={i} className="flex gap-2.5 text-sm text-ink-700 dark:text-gray-300 mb-2 last:mb-0">
-                <span className="text-ink-300 dark:text-gray-600 font-mono shrink-0 mt-0.5">{i+1}.</span>
-                <span className="leading-relaxed">{pt}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="rounded-2xl p-3.5 border border-sage-200 dark:border-sage-800 bg-sage-50 dark:bg-sage-950">
-            <p className="label-tag mb-1.5 text-sage-600">📣 CTA</p>
-            <p className="text-ink-800 dark:text-gray-200 text-sm font-semibold leading-relaxed">"{data.cta}"</p>
-          </div>
-
-          {data.tip && (
-            <div className="rounded-2xl p-3 border border-sand-200 dark:border-gray-700 bg-sand-50 dark:bg-gray-800">
-              <p className="label-tag mb-1 text-sand-500">💡 Delivery Tip</p>
-              <p className="text-ink-500 dark:text-gray-400 text-xs leading-relaxed">{data.tip}</p>
+          {/* Setup */}
+          {data.setup && (
+            <div className="rounded-2xl p-3.5" style={{background:'#faf4e8',border:'1px solid #edd9b8'}}>
+              <p className="label-tag mb-1" style={{color:'#a6884e'}}>⚡ Setup</p>
+              <p className="text-sm leading-relaxed" style={{color:'#44392e'}}>{data.setup}</p>
             </div>
           )}
 
-          <CopyButton text={`HOOK:\n"${data.hook}"\n\nBODY:\n${data.body?.map((p,i)=>`${i+1}. ${p}`).join('\n')}\n\nCTA:\n"${data.cta}"\n\nTIP: ${data.tip}`} />
+          {/* Body */}
+          <div className="rounded-2xl p-3.5" style={{background:'#faf4e8',border:'1px solid #edd9b8'}}>
+            <p className="label-tag mb-2" style={{color:'#9e8872'}}>📢 Body</p>
+            <div className="space-y-2">
+              {data.body?.map((pt,i) => (
+                <div key={i} className="flex gap-2.5 text-sm" style={{color:'#44392e'}}>
+                  <span className="font-mono shrink-0 mt-0.5" style={{color:'#c4b09a'}}>{i+1}.</span>
+                  <span className="leading-relaxed">{pt}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Payoff */}
+          {data.payoff && (
+            <div className="rounded-2xl p-3.5" style={{background:'#e8f0eb',border:'1px solid #a4c4ae'}}>
+              <p className="label-tag mb-1" style={{color:'#326944'}}>🎯 Payoff</p>
+              <p className="text-sm leading-relaxed font-medium" style={{color:'#2e2720'}}>{data.payoff}</p>
+            </div>
+          )}
+
+          {/* CTA */}
+          <div className="rounded-2xl p-3.5" style={{background:'#e8f0eb',border:'1px solid #a4c4ae'}}>
+            <p className="label-tag mb-1" style={{color:'#326944'}}>📣 CTA</p>
+            <p className="text-sm font-bold leading-relaxed" style={{color:'#2e2720'}}>"{data.cta}"</p>
+          </div>
+
+          {/* Editing tips */}
+          {data.editingTips?.length > 0 && (
+            <div className="rounded-2xl p-3.5" style={{background:'#f5f0e8',border:'1px solid #d9c9a8'}}>
+              <p className="label-tag mb-2" style={{color:'#a6884e'}}>🎞️ Editing Tips</p>
+              <div className="space-y-1.5">
+                {data.editingTips.map((t,i) => (
+                  <div key={i} className="flex gap-2 text-xs" style={{color:'#7a6655'}}>
+                    <span style={{color:'#c4b09a'}}>•</span>{t}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Caption */}
+          {data.captionSuggestion && (
+            <div className="rounded-2xl p-3.5" style={{background:'#fdfaf5',border:'1px solid #f5ebd4'}}>
+              <p className="label-tag mb-1" style={{color:'#9e8872'}}>📝 Caption</p>
+              <p className="text-xs leading-relaxed" style={{color:'#7a6655'}}>{data.captionSuggestion}</p>
+            </div>
+          )}
+
+          <CopyBtn text={[
+            `HOOK: "${data.hook}"`,
+            data.setup ? `\nSETUP: ${data.setup}` : '',
+            `\nBODY:\n${data.body?.map((p,i)=>`${i+1}. ${p}`).join('\n')}`,
+            data.payoff ? `\nPAYOFF: ${data.payoff}` : '',
+            `\nCTA: "${data.cta}"`,
+            data.editingTips?.length ? `\nEDITING TIPS:\n${data.editingTips.map(t=>`• ${t}`).join('\n')}` : '',
+            data.captionSuggestion ? `\nCAPTION:\n${data.captionSuggestion}` : '',
+          ].filter(Boolean).join('')} />
         </div>
       )}
     </div>
   )
 }
 
-export default function Dashboard({ profile, strategy, webUsed, onReset, generateScript, generateNewIdeas, scripts, loadingNewIdeas }) {
+function CompetitorCard({ c }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="card overflow-hidden">
+      <button onClick={()=>setOpen(o=>!o)} className="w-full text-left p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-lg shrink-0"
+              style={{background:'#fce8df',border:'1px solid #f0a98f'}}>
+              {c.name?.charAt(0)||'?'}
+            </div>
+            <div className="min-w-0">
+              <p className="font-display text-base text-ink-900 dark:text-gray-100 leading-tight">{c.name}</p>
+              <p className="text-xs mt-0.5" style={{color:'#9e8872'}}>{c.platform} · {c.followers} followers</p>
+              <p className="text-xs mt-1 text-ink-500 dark:text-gray-400 truncate">{c.niche}</p>
+            </div>
+          </div>
+          <span className="text-ink-300 dark:text-gray-600 text-sm shrink-0">{open?'▲':'▼'}</span>
+        </div>
+      </button>
+
+      {open && (
+        <div className="px-5 pb-5 space-y-3 animate-fade-in">
+          <div style={{borderTop:'1px solid #f5ebd4'}} className="pt-4 space-y-3">
+            <Row label="Content style" value={c.contentStyle}/>
+            <Row label="Posts" value={c.postingFreq}/>
+            <div>
+              <p className="label-tag mb-1.5">Top formats</p>
+              <div className="flex flex-wrap gap-1.5">
+                {c.topFormats?.map(f=>(
+                  <span key={f} className="text-xs rounded-full px-2.5 py-1"
+                    style={{background:'#faf4e8',border:'1px solid #edd9b8',color:'#7a6655'}}>
+                    {FORMAT_EMOJI[f]||'📹'} {f}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="label-tag mb-1" style={{color:'#326944'}}>✅ Why they work</p>
+              <p className="text-sm text-ink-600 dark:text-gray-400 leading-relaxed">{c.whatWorks}</p>
+            </div>
+            <div className="rounded-xl p-3" style={{background:'#fce8df',border:'1px solid #f0a98f'}}>
+              <p className="label-tag mb-1" style={{color:'#c95f43'}}>🪝 Signature hook style</p>
+              <p className="text-sm italic" style={{color:'#44392e'}}>"{c.signatureHook}"</p>
+            </div>
+            <div className="rounded-xl p-3" style={{background:'#faf4e8',border:'1px solid #edd9b8'}}>
+              <p className="label-tag mb-1" style={{color:'#a6884e'}}>⚠️ Their weakness / gap</p>
+              <p className="text-sm" style={{color:'#7a6655'}}>{c.weaknesses}</p>
+            </div>
+            <div className="rounded-xl p-3" style={{background:'#e8f0eb',border:'1px solid #a4c4ae'}}>
+              <p className="label-tag mb-1" style={{color:'#326944'}}>💡 Steal this idea (put your spin on it)</p>
+              <p className="text-sm font-medium" style={{color:'#2e2720'}}>{c.inspireIdea}</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function Row({ label, value }) {
+  return (
+    <div>
+      <p className="label-tag mb-0.5">{label}</p>
+      <p className="text-sm text-ink-700 dark:text-gray-300 leading-relaxed">{value}</p>
+    </div>
+  )
+}
+
+export default function Dashboard({ profile, strategy, competitors, webUsed, onReset, scripts, loadingNewIdeas, loadingCompetitors, generateScript, generateNewIdeas, generateCompetitors }) {
   const [activeTab, setActiveTab] = useState('overview')
   const [confirmReset, setConfirmReset] = useState(false)
 
   const tabs = [
-    {id:'overview', label:'Overview', emoji:'✦'},
-    {id:'brand',    label:'Brand',    emoji:'🎨'},
-    {id:'growth',   label:'Growth',   emoji:'📈'},
-    {id:'calendar', label:'Calendar', emoji:'📅'},
-    {id:'ideas',    label:'Ideas',    emoji:'💡'},
-    {id:'tips',     label:'Tips',     emoji:'⚡'},
+    {id:'overview',     label:'Overview',     emoji:'✦'},
+    {id:'brand',        label:'Brand',        emoji:'🎨'},
+    {id:'growth',       label:'Growth',       emoji:'📈'},
+    {id:'calendar',     label:'Calendar',     emoji:'📅'},
+    {id:'ideas',        label:'Ideas',        emoji:'💡'},
+    {id:'competitors',  label:'Competitors',  emoji:'🔍'},
+    {id:'tips',         label:'Tips',         emoji:'⚡'},
   ]
 
   const savedAt = (() => {
@@ -104,29 +206,34 @@ export default function Dashboard({ profile, strategy, webUsed, onReset, generat
   })()
 
   return (
-    <div className="min-h-screen bg-cream-50 dark:bg-gray-950">
-      {/* Sticky header */}
-      <header className="sticky top-0 z-40 bg-cream-50/95 dark:bg-gray-950/95 backdrop-blur-md border-b border-cream-200 dark:border-gray-800">
+    <div className="min-h-screen" style={{background:'inherit'}}>
+      {/* Header */}
+      <header className="sticky top-0 z-40 header-bg border-b border-cream-200 dark:border-gray-800">
+        {/* Title row — right side only has "New profile", dark/settings are floating in App.jsx */}
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
-            <AriaAvatar size="sm" />
+            <AriaAvatar size="sm"/>
             <div className="min-w-0">
               <p className="font-display text-sm text-ink-800 dark:text-gray-200 leading-none truncate">Aria for {profile.name}</p>
-              {savedAt && <p className="text-[10px] text-ink-300 dark:text-gray-600 font-mono mt-0.5 truncate">saved {savedAt}</p>}
+              {savedAt && <p className="text-[10px] text-ink-300 dark:text-gray-600 font-mono mt-0.5">saved {savedAt}</p>}
             </div>
           </div>
 
-          {/* Controls — no overlap issues */}
+          {/* New profile button — lives here, well away from floating toolbar */}
           <div className="flex items-center gap-2 shrink-0">
-            {webUsed && <WebBadge />}
+            {webUsed && <WebBadge/>}
             {confirmReset ? (
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-ink-500 dark:text-gray-400 hidden sm:inline">Sure?</span>
-                <button onClick={onReset} className="text-xs text-red-500 hover:text-red-700 border border-red-200 dark:border-red-800 rounded-xl px-2.5 py-1.5">Yes</button>
-                <button onClick={()=>setConfirmReset(false)} className="text-xs text-ink-400 border border-cream-300 dark:border-gray-700 rounded-xl px-2.5 py-1.5">No</button>
+                <span className="text-xs hidden sm:inline" style={{color:'#9e8872'}}>Reset?</span>
+                <button onClick={onReset} className="text-xs px-2.5 py-1.5 rounded-xl"
+                  style={{color:'#ef4444',border:'1px solid #fca5a5'}}>Yes</button>
+                <button onClick={()=>setConfirmReset(false)} className="text-xs px-2.5 py-1.5 rounded-xl text-ink-400 dark:text-gray-500"
+                  style={{border:'1px solid #edd9b8'}}>No</button>
               </div>
             ) : (
-              <button onClick={()=>setConfirmReset(true)} className="text-xs text-ink-400 dark:text-gray-500 hover:text-ink-600 dark:hover:text-gray-300 border border-cream-300 dark:border-gray-700 rounded-xl px-3 py-1.5 transition-all">
+              <button onClick={()=>setConfirmReset(true)}
+                className="text-xs px-3 py-1.5 rounded-xl transition-all text-ink-400 dark:text-gray-500 hover:text-ink-700 dark:hover:text-gray-300"
+                style={{border:'1px solid #edd9b8'}}>
                 New profile
               </button>
             )}
@@ -135,11 +242,10 @@ export default function Dashboard({ profile, strategy, webUsed, onReset, generat
 
         {/* Tabs */}
         <div className="max-w-3xl mx-auto px-4 flex gap-1 overflow-x-auto no-scrollbar pb-2 pt-1">
-          {tabs.map(t => (
+          {tabs.map(t=>(
             <button key={t.id} onClick={()=>setActiveTab(t.id)}
               className={clsx('flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all',
-                activeTab===t.id ? 'tab-active' : 'tab-idle'
-              )}>
+                activeTab===t.id ? 'tab-active' : 'tab-idle')}>
               <span>{t.emoji}</span>{t.label}
             </button>
           ))}
@@ -148,27 +254,29 @@ export default function Dashboard({ profile, strategy, webUsed, onReset, generat
 
       <main className="max-w-3xl mx-auto px-4 py-6 pb-24 space-y-4">
 
-        {/* OVERVIEW */}
+        {/* ── OVERVIEW ── */}
         {activeTab==='overview' && (
           <div className="animate-fade-up space-y-4">
             <div className="card p-6">
               <AriaSays>{strategy.greeting}</AriaSays>
               {savedAt && (
-                <div className="flex items-center gap-2 mt-4 bg-sage-50 dark:bg-sage-950 border border-sage-100 dark:border-sage-900 rounded-2xl px-4 py-2.5">
-                  <span className="text-sage-500 text-sm">💾</span>
-                  <p className="text-sage-700 dark:text-sage-300 text-xs">Session restored from {savedAt}</p>
+                <div className="flex items-center gap-2 mt-4 rounded-2xl px-4 py-2.5"
+                  style={{background:'#e8f0eb',border:'1px solid #ccddd2'}}>
+                  <span style={{color:'#4a8a5d'}}>💾</span>
+                  <p className="text-xs" style={{color:'#326944'}}>Session restored · {savedAt}</p>
                 </div>
               )}
               <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  {label:'Platform', value:profile.platforms?.[0]},
+                  {label:'Platform',  value:profile.platforms?.[0]},
                   {label:'Followers', value:profile.followers},
-                  {label:'Posting', value:profile.postingFreq?.split(' ').slice(0,2).join(' ')},
-                  {label:'Goal', value:profile.goal?.split(' ').slice(0,3).join(' ')+'…'},
+                  {label:'Posting',   value:profile.postingFreq?.split(' ').slice(0,2).join(' ')},
+                  {label:'Goal',      value:profile.goal?.split(' ').slice(0,3).join(' ')+'…'},
                 ].map(s=>(
-                  <div key={s.label} className="bg-cream-50 dark:bg-gray-800 rounded-2xl p-3 border border-cream-200 dark:border-gray-700 text-center">
+                  <div key={s.label} className="rounded-2xl p-3 text-center"
+                    style={{background:'#faf4e8',border:'1px solid #f5ebd4'}}>
                     <p className="label-tag mb-1">{s.label}</p>
-                    <p className="text-ink-800 dark:text-gray-200 text-sm font-semibold leading-snug">{s.value}</p>
+                    <p className="text-sm font-semibold leading-snug text-ink-800 dark:text-gray-200">{s.value}</p>
                   </div>
                 ))}
               </div>
@@ -176,15 +284,17 @@ export default function Dashboard({ profile, strategy, webUsed, onReset, generat
 
             <div className="grid grid-cols-2 gap-3">
               {[
-                {tab:'brand',    emoji:'🎨', title:'Brand Voice',      sub:`${strategy.brandVoice?.pillars?.length||3} pillars defined`},
-                {tab:'growth',   emoji:'📈', title:'Growth Strategy',  sub:`${strategy.growthStrategy?.tactics?.length||4} tactics`},
-                {tab:'calendar', emoji:'📅', title:'7-Day Calendar',   sub:'Ready to post'},
-                {tab:'ideas',    emoji:'💡', title:'Content Ideas',    sub:`${strategy.contentIdeas?.length||6} ideas + scripts`},
+                {tab:'brand',       emoji:'🎨', title:'Brand Voice',    sub:`${strategy.brandVoice?.pillars?.length||3} content pillars`},
+                {tab:'growth',      emoji:'📈', title:'Growth Strategy',sub:`${strategy.growthStrategy?.tactics?.length||4} tactics`},
+                {tab:'calendar',    emoji:'📅', title:'7-Day Calendar', sub:'Ready to post'},
+                {tab:'ideas',       emoji:'💡', title:'Content Ideas',  sub:`${strategy.contentIdeas?.length||6} ideas + scripts`},
+                {tab:'competitors', emoji:'🔍', title:'Competitors',    sub:competitors?`${competitors.competitors?.length} analysed`:'Tap to research'},
+                {tab:'tips',        emoji:'⚡', title:'Tips & Metrics', sub:'Performance advice'},
               ].map(c=>(
                 <button key={c.tab} onClick={()=>setActiveTab(c.tab)}
-                  className="card p-5 text-left hover:shadow-warm-lg transition-all active:scale-[0.98] group">
-                  <span className="text-2xl mb-2 block">{c.emoji}</span>
-                  <p className="font-display text-base text-ink-800 dark:text-gray-200 mb-0.5">{c.title}</p>
+                  className="card p-4 text-left hover:shadow-warm-lg transition-all active:scale-[0.98] group">
+                  <span className="text-xl mb-2 block">{c.emoji}</span>
+                  <p className="font-display text-sm text-ink-800 dark:text-gray-200 mb-0.5">{c.title}</p>
                   <p className="text-xs text-ink-400 dark:text-gray-500 group-hover:text-terra-500 transition-colors">{c.sub}</p>
                 </button>
               ))}
@@ -194,8 +304,9 @@ export default function Dashboard({ profile, strategy, webUsed, onReset, generat
               <div className="space-y-3">
                 {strategy.performanceTips?.quickWins?.map((w,i)=>(
                   <div key={i} className="flex gap-3 items-start">
-                    <span className="w-5 h-5 rounded-full bg-sage-200 dark:bg-sage-800 text-sage-700 dark:text-sage-300 flex items-center justify-center text-xs shrink-0 mt-0.5 font-bold">{i+1}</span>
-                    <p className="text-ink-700 dark:text-gray-300 text-sm leading-relaxed">{w}</p>
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs shrink-0 mt-0.5 font-bold"
+                      style={{background:'#ccddd2',color:'#326944'}}>{i+1}</span>
+                    <p className="text-sm text-ink-700 dark:text-gray-300 leading-relaxed">{w}</p>
                   </div>
                 ))}
               </div>
@@ -206,35 +317,37 @@ export default function Dashboard({ profile, strategy, webUsed, onReset, generat
                 <span className="text-xl">🎯</span>
                 <p className="font-display text-base text-ink-900 dark:text-gray-100">Fix: {profile.struggle}</p>
               </div>
-              <p className="text-ink-600 dark:text-gray-400 text-sm leading-relaxed">{strategy.performanceTips?.struggleFix}</p>
-              <button onClick={()=>setActiveTab('tips')} className="mt-3 text-xs text-terra-500 hover:text-terra-600 font-medium">See all tips →</button>
+              <p className="text-sm text-ink-600 dark:text-gray-400 leading-relaxed">{strategy.performanceTips?.struggleFix}</p>
+              <button onClick={()=>setActiveTab('tips')} className="mt-3 text-xs font-medium" style={{color:'#c95f43'}}>See all tips →</button>
             </div>
           </div>
         )}
 
-        {/* BRAND */}
+        {/* ── BRAND ── */}
         {activeTab==='brand' && (
           <div className="animate-fade-up space-y-4">
             <SectionCard icon="🎨" title="Your Brand Voice" subtitle="What makes you, you.">
               <div className="mb-5">
                 <p className="label-tag mb-2">Your unique angle</p>
-                <p className="text-ink-700 dark:text-gray-300 text-sm bg-terra-50 dark:bg-terra-950 rounded-2xl p-4 border border-terra-100 dark:border-terra-900 leading-relaxed italic">
+                <p className="text-sm italic leading-relaxed p-4 rounded-2xl"
+                  style={{background:'#fce8df',border:'1px solid #f0a98f',color:'#44392e'}}>
                   "{strategy.brandVoice?.uniqueAngle}"
                 </p>
               </div>
               <div className="mb-5">
-                <p className="label-tag mb-3">Tone of voice</p>
+                <p className="label-tag mb-2">Tone of voice</p>
                 <div className="flex flex-wrap gap-2">
                   {strategy.brandVoice?.tone?.map(t=>(
-                    <span key={t} className="bg-sand-100 dark:bg-sand-900 border border-sand-200 dark:border-sand-800 text-sand-600 dark:text-sand-300 text-sm rounded-full px-3 py-1.5">{t}</span>
+                    <span key={t} className="text-sm rounded-full px-3 py-1.5"
+                      style={{background:'#f5f0e8',border:'1px solid #d9c9a8',color:'#a6884e'}}>{t}</span>
                   ))}
                 </div>
               </div>
               <div>
                 <p className="label-tag mb-2">What to avoid</p>
                 {strategy.brandVoice?.avoid?.map(a=>(
-                  <div key={a} className="flex gap-2 items-start text-sm text-ink-500 dark:text-gray-400 mb-1.5">
-                    <span className="text-terra-300 shrink-0">✕</span>{a}
+                  <div key={a} className="flex gap-2 items-start text-sm mb-1.5 text-ink-500 dark:text-gray-400">
+                    <span style={{color:'#f0a98f'}}>✕</span>{a}
                   </div>
                 ))}
               </div>
@@ -242,57 +355,58 @@ export default function Dashboard({ profile, strategy, webUsed, onReset, generat
             <p className="label-tag px-1">Content pillars</p>
             {strategy.brandVoice?.pillars?.map((p,i)=>(
               <div key={i} className="card p-5 flex gap-4 items-start">
-                <div className="w-12 h-12 rounded-2xl bg-cream-100 dark:bg-gray-800 border border-cream-200 dark:border-gray-700 flex items-center justify-center text-2xl shrink-0">{p.emoji}</div>
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0"
+                  style={{background:'#faf4e8',border:'1px solid #f5ebd4'}}>{p.emoji}</div>
                 <div>
                   <p className="font-display text-base text-ink-900 dark:text-gray-100 mb-1">{p.name}</p>
-                  <p className="text-ink-500 dark:text-gray-400 text-sm leading-relaxed">{p.description}</p>
+                  <p className="text-sm text-ink-500 dark:text-gray-400 leading-relaxed">{p.description}</p>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* GROWTH */}
+        {/* ── GROWTH ── */}
         {activeTab==='growth' && (
           <div className="animate-fade-up space-y-4">
             <SectionCard icon="📈" title="Growth Strategy">
-              <p className="text-ink-600 dark:text-gray-400 text-sm leading-relaxed mb-5">{strategy.growthStrategy?.summary}</p>
+              <p className="text-sm text-ink-600 dark:text-gray-400 leading-relaxed mb-5">{strategy.growthStrategy?.summary}</p>
               <div className="space-y-3">
                 {strategy.growthStrategy?.tactics?.map((t,i)=>(
-                  <div key={i} className="bg-cream-50 dark:bg-gray-800 rounded-2xl p-4 border border-cream-200 dark:border-gray-700">
+                  <div key={i} className="rounded-2xl p-4" style={{background:'#faf4e8',border:'1px solid #f5ebd4'}}>
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <p className="font-display text-base text-ink-800 dark:text-gray-200">{t.title}</p>
-                      <PriorityBadge level={t.priority} />
+                      <PriorityBadge level={t.priority}/>
                     </div>
-                    <p className="text-ink-500 dark:text-gray-400 text-sm leading-relaxed mb-2">{t.description}</p>
-                    <p className="text-[11px] font-mono text-ink-300 dark:text-gray-600">⏱ {t.timeframe}</p>
+                    <p className="text-sm text-ink-500 dark:text-gray-400 leading-relaxed mb-2">{t.description}</p>
+                    <p className="text-[11px] font-mono" style={{color:'#c4b09a'}}>⏱ {t.timeframe}</p>
                   </div>
                 ))}
               </div>
             </SectionCard>
-
             <SectionCard icon="⏰" title="Posting Schedule">
               <div className="mb-4">
                 <p className="label-tag mb-2">Recommended frequency</p>
-                <p className="text-ink-700 dark:text-gray-300 text-sm bg-sand-50 dark:bg-gray-800 rounded-xl p-3 border border-sand-100 dark:border-gray-700 leading-relaxed">{strategy.growthStrategy?.postingSchedule?.frequency}</p>
+                <p className="text-sm text-ink-700 dark:text-gray-300 leading-relaxed p-3 rounded-xl"
+                  style={{background:'#f5f0e8',border:'1px solid #d9c9a8'}}>{strategy.growthStrategy?.postingSchedule?.frequency}</p>
               </div>
               <div className="mb-4">
                 <p className="label-tag mb-2">Best times</p>
                 {strategy.growthStrategy?.postingSchedule?.bestTimes?.map((t,i)=>(
                   <div key={i} className="flex gap-2 text-sm text-ink-600 dark:text-gray-400 mb-1.5">
-                    <span className="text-terra-400 shrink-0">→</span>{t}
+                    <span style={{color:'#e07a5f'}}>→</span>{t}
                   </div>
                 ))}
               </div>
-              <div className="bg-sage-50 dark:bg-sage-950 rounded-xl p-3 border border-sage-100 dark:border-sage-900">
-                <p className="label-tag mb-1 text-sage-600">Consistency tip</p>
-                <p className="text-ink-600 dark:text-gray-400 text-sm leading-relaxed">{strategy.growthStrategy?.postingSchedule?.consistency}</p>
+              <div className="rounded-xl p-3" style={{background:'#e8f0eb',border:'1px solid #ccddd2'}}>
+                <p className="label-tag mb-1" style={{color:'#326944'}}>Consistency tip</p>
+                <p className="text-sm text-ink-600 dark:text-gray-400 leading-relaxed">{strategy.growthStrategy?.postingSchedule?.consistency}</p>
               </div>
             </SectionCard>
           </div>
         )}
 
-        {/* CALENDAR */}
+        {/* ── CALENDAR ── */}
         {activeTab==='calendar' && (
           <div className="animate-fade-up space-y-3">
             <div className="flex items-center justify-between px-1">
@@ -302,7 +416,8 @@ export default function Dashboard({ profile, strategy, webUsed, onReset, generat
             {strategy.calendar?.map((day,i)=>(
               <div key={day.day} className={clsx('card p-5', day.day==='Sunday'&&'opacity-70')}>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className={clsx('w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold font-mono shrink-0', DAY_COLORS[i]||DAY_COLORS[0])}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold font-mono shrink-0"
+                    style={{background:DAY_BG[i]||DAY_BG[0], color:DAY_CO[i]||DAY_CO[0]}}>
                     {day.day.slice(0,3).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -312,12 +427,12 @@ export default function Dashboard({ profile, strategy, webUsed, onReset, generat
                   {day.format&&day.format!=='optional'&&<span className="text-xl shrink-0">{FORMAT_EMOJI[day.format]||'📹'}</span>}
                 </div>
                 {day.idea&&<>
-                  <p className="text-ink-700 dark:text-gray-300 text-sm font-medium mb-1.5 leading-snug">{day.idea}</p>
-                  {day.hook&&<p className="text-ink-400 dark:text-gray-500 text-xs italic mb-3">"{day.hook}"</p>}
+                  <p className="text-sm font-medium text-ink-700 dark:text-gray-300 mb-1.5 leading-snug">{day.idea}</p>
+                  {day.hook&&<p className="text-xs italic mb-3 text-ink-400 dark:text-gray-500">"{day.hook}"</p>}
                   {day.caption&&(
-                    <div className="bg-cream-50 dark:bg-gray-800 rounded-xl p-3 border border-cream-200 dark:border-gray-700">
+                    <div className="rounded-xl p-3" style={{background:'#faf4e8',border:'1px solid #f5ebd4'}}>
                       <p className="label-tag mb-1">Caption tip</p>
-                      <p className="text-ink-500 dark:text-gray-400 text-xs leading-relaxed">{day.caption}</p>
+                      <p className="text-xs text-ink-500 dark:text-gray-400 leading-relaxed">{day.caption}</p>
                     </div>
                   )}
                 </>}
@@ -326,80 +441,129 @@ export default function Dashboard({ profile, strategy, webUsed, onReset, generat
           </div>
         )}
 
-        {/* IDEAS */}
+        {/* ── IDEAS ── */}
         {activeTab==='ideas' && (
           <div className="animate-fade-up space-y-4">
             <div className="flex items-center justify-between px-1">
               <div>
                 <h2 className="font-display text-xl text-ink-900 dark:text-gray-100">Content Ideas</h2>
-                <p className="text-ink-400 dark:text-gray-500 text-xs mt-0.5">Tap "Generate Script" on any idea</p>
+                <p className="text-xs text-ink-400 dark:text-gray-500 mt-0.5">Generate a script for any idea below</p>
               </div>
-              <button
-                onClick={generateNewIdeas}
-                disabled={loadingNewIdeas}
-                className="flex items-center gap-1.5 btn-secondary py-2 px-3 text-xs disabled:opacity-50"
-              >
-                <RotateCcw size={12} className={loadingNewIdeas?'animate-spin':''} />
-                {loadingNewIdeas ? 'Finding ideas…' : 'New Ideas'}
+              <button onClick={generateNewIdeas} disabled={loadingNewIdeas}
+                className="btn-secondary text-xs py-2 px-3 flex items-center gap-1.5 disabled:opacity-50">
+                <RotateCcw size={12} className={loadingNewIdeas?'animate-spin':''}/>
+                {loadingNewIdeas?'Finding…':'New Ideas'}
               </button>
             </div>
 
-            {loadingNewIdeas && (
-              <div className="card p-6 flex justify-center">
-                <Spinner text="Finding fresh content ideas…" />
-              </div>
-            )}
+            {loadingNewIdeas && <div className="card p-6 flex justify-center"><Spinner text="Finding fresh ideas…"/></div>}
 
-            {!loadingNewIdeas && strategy.contentIdeas?.map((idea,i)=>{
-              const scriptState = scripts[idea.title]
-              return (
-                <div key={i} className="card p-5">
-                  <div className="flex items-start gap-3 mb-3">
-                    <span className="text-2xl shrink-0">{idea.emoji}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-display text-base text-ink-900 dark:text-gray-100 mb-1 leading-snug">{idea.title}</p>
-                      <p className="text-ink-400 dark:text-gray-500 text-sm italic leading-relaxed">"{idea.hook}"</p>
-                    </div>
-                    <PotentialBadge level={idea.potential} />
+            {!loadingNewIdeas && strategy.contentIdeas?.map((idea,i)=>(
+              <div key={`${idea.title}-${i}`} className="card p-5">
+                <div className="flex items-start gap-3 mb-3">
+                  <span className="text-2xl shrink-0">{idea.emoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-display text-base text-ink-900 dark:text-gray-100 mb-1 leading-snug">{idea.title}</p>
+                    <p className="text-sm italic leading-relaxed text-ink-400 dark:text-gray-500">"{idea.hook}"</p>
                   </div>
-
-                  <div className="bg-cream-50 dark:bg-gray-800 rounded-xl p-3 border border-cream-200 dark:border-gray-700 mb-3">
-                    <p className="label-tag mb-1">Why this works for you</p>
-                    <p className="text-ink-600 dark:text-gray-400 text-xs leading-relaxed">{idea.why}</p>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-ink-300 dark:text-gray-600">{FORMAT_EMOJI[idea.format]||'📹'} {idea.format}</span>
-                  </div>
-
-                  <ScriptPanel
-                    ideaTitle={idea.title}
-                    scriptState={scriptState}
-                    onGenerate={()=>generateScript(idea)}
-                  />
+                  <PotentialBadge level={idea.potential}/>
                 </div>
-              )
-            })}
+                <div className="rounded-xl p-3 mb-3" style={{background:'#faf4e8',border:'1px solid #f5ebd4'}}>
+                  <p className="label-tag mb-1">Why this works for you</p>
+                  <p className="text-xs text-ink-600 dark:text-gray-400 leading-relaxed">{idea.why}</p>
+                </div>
+                <p className="text-xs text-ink-300 dark:text-gray-600 mb-1">{FORMAT_EMOJI[idea.format]||'📹'} {idea.format}</p>
+                <ScriptPanel scriptState={scripts[idea.title]} onGenerate={()=>generateScript(idea)}/>
+              </div>
+            ))}
           </div>
         )}
 
-        {/* TIPS */}
+        {/* ── COMPETITORS ── */}
+        {activeTab==='competitors' && (
+          <div className="animate-fade-up space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <div>
+                <h2 className="font-display text-xl text-ink-900 dark:text-gray-100">Competitor Research</h2>
+                <p className="text-xs text-ink-400 dark:text-gray-500 mt-0.5">Creators posting similar content to inspire you</p>
+              </div>
+              <button onClick={generateCompetitors} disabled={loadingCompetitors}
+                className="btn-secondary text-xs py-2 px-3 flex items-center gap-1.5 disabled:opacity-50">
+                <RefreshCw size={12} className={loadingCompetitors?'animate-spin':''}/>
+                {loadingCompetitors?'Searching…': competitors?'Refresh':'Research'}
+              </button>
+            </div>
+
+            {!competitors && !loadingCompetitors && (
+              <div className="card p-8 text-center">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-4"
+                  style={{background:'#fce8df',border:'1px solid #f0a98f'}}>🔍</div>
+                <p className="font-display text-lg text-ink-900 dark:text-gray-100 mb-2">Discover your competitors</p>
+                <p className="text-sm text-ink-400 dark:text-gray-500 mb-6 leading-relaxed">
+                  Aria will find creators posting similar content in your niche — what they do well, where they fall short, and ideas you can steal.
+                </p>
+                <button onClick={generateCompetitors} className="btn-primary flex items-center gap-2 mx-auto">
+                  <Users size={15}/> Research Competitors
+                </button>
+              </div>
+            )}
+
+            {loadingCompetitors && (
+              <div className="card p-8 flex flex-col items-center gap-3">
+                <Spinner text="Searching for creators in your niche…"/>
+                <p className="text-xs font-mono text-ink-300 dark:text-gray-600">Analysing content, hooks, and strategies</p>
+              </div>
+            )}
+
+            {competitors && !loadingCompetitors && (
+              <>
+                <div className="card p-5">
+                  <p className="label-tag mb-2">Market overview</p>
+                  <p className="text-sm text-ink-700 dark:text-gray-300 leading-relaxed">{competitors.summary}</p>
+                </div>
+
+                <div className="space-y-3">
+                  {competitors.competitors?.map((c,i)=><CompetitorCard key={i} c={c}/>)}
+                </div>
+
+                <div className="card p-5" style={{borderLeft:'3px solid #e07a5f'}}>
+                  <p className="label-tag mb-2" style={{color:'#c95f43'}}>✨ Your edge in this market</p>
+                  <p className="text-sm text-ink-700 dark:text-gray-300 leading-relaxed mb-4">{competitors.yourEdge}</p>
+                  <p className="label-tag mb-2">Do this now</p>
+                  <div className="space-y-2">
+                    {competitors.doThis?.map((a,i)=>(
+                      <div key={i} className="flex gap-2.5 items-start">
+                        <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs shrink-0 font-bold mt-0.5"
+                          style={{background:'#fce8df',color:'#a8432a'}}>{i+1}</span>
+                        <p className="text-sm text-ink-700 dark:text-gray-300 leading-relaxed">{a}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ── TIPS ── */}
         {activeTab==='tips' && (
           <div className="animate-fade-up space-y-4">
-            <SectionCard icon="🎯" title="Fix Your Biggest Struggle" subtitle={profile.struggle}>
-              <p className="text-ink-700 dark:text-gray-300 text-sm leading-relaxed bg-terra-50 dark:bg-terra-950 rounded-2xl p-4 border border-terra-100 dark:border-terra-900">
+            <SectionCard icon="🎯" title="Fix Your Struggle" subtitle={profile.struggle}>
+              <p className="text-sm text-ink-700 dark:text-gray-300 leading-relaxed p-4 rounded-2xl"
+                style={{background:'#fce8df',border:'1px solid #f0a98f'}}>
                 {strategy.performanceTips?.struggleFix}
               </p>
             </SectionCard>
-            <SectionCard icon="🚀" title="Level Up Advice" subtitle={`For ${profile.followers} followers`}>
-              <p className="text-ink-700 dark:text-gray-300 text-sm leading-relaxed">{strategy.performanceTips?.levelUpTip}</p>
+            <SectionCard icon="🚀" title="Level Up" subtitle={`Going beyond ${profile.followers}`}>
+              <p className="text-sm text-ink-700 dark:text-gray-300 leading-relaxed">{strategy.performanceTips?.levelUpTip}</p>
             </SectionCard>
             <SectionCard icon="📊" title="Metrics to Track">
               <div className="space-y-3">
                 {strategy.performanceTips?.metrics?.map((m,i)=>(
                   <div key={i} className="flex gap-3 items-start">
-                    <span className="w-6 h-6 rounded-full bg-sand-100 dark:bg-sand-900 border border-sand-200 dark:border-sand-800 flex items-center justify-center text-xs text-sand-600 dark:text-sand-300 font-bold shrink-0 mt-0.5">{i+1}</span>
-                    <p className="text-ink-600 dark:text-gray-400 text-sm leading-relaxed">{m}</p>
+                    <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"
+                      style={{background:'#f5f0e8',border:'1px solid #d9c9a8',color:'#a6884e'}}>{i+1}</span>
+                    <p className="text-sm text-ink-600 dark:text-gray-400 leading-relaxed">{m}</p>
                   </div>
                 ))}
               </div>
@@ -407,9 +571,11 @@ export default function Dashboard({ profile, strategy, webUsed, onReset, generat
             <SectionCard icon="⚡" title="Quick Wins This Week">
               <div className="space-y-3">
                 {strategy.performanceTips?.quickWins?.map((w,i)=>(
-                  <div key={i} className="flex gap-3 items-start bg-cream-50 dark:bg-gray-800 rounded-2xl p-3.5 border border-cream-200 dark:border-gray-700">
-                    <span className="w-5 h-5 rounded-full bg-terra-200 dark:bg-terra-800 text-terra-700 dark:text-terra-200 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i+1}</span>
-                    <p className="text-ink-700 dark:text-gray-300 text-sm leading-relaxed">{w}</p>
+                  <div key={i} className="flex gap-3 items-start rounded-2xl p-3.5"
+                    style={{background:'#faf4e8',border:'1px solid #f5ebd4'}}>
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"
+                      style={{background:'#f8cfc0',color:'#a8432a'}}>{i+1}</span>
+                    <p className="text-sm text-ink-700 dark:text-gray-300 leading-relaxed">{w}</p>
                   </div>
                 ))}
               </div>
