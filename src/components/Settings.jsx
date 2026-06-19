@@ -44,7 +44,7 @@ export default function Settings({ onBack, dark }) {
         <div className="card p-6 mb-4">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{background:'#fce8df',border:'1px solid #f0a98f'}}>
-              <Key size={14} style={{color:'#c95f43'}}/>
+              <Key size={14} style={{color:'var(--terra)'}}/>
             </div>
             <div>
               <p className="font-display text-base text-ink-800 dark:text-gray-200">Groq API Key</p>
@@ -52,7 +52,7 @@ export default function Settings({ onBack, dark }) {
             </div>
           </div>
           <a href="https://console.groq.com" target="_blank" rel="noreferrer"
-            className="inline-flex items-center gap-1 text-xs mb-4" style={{color:'#c95f43'}}>
+            className="inline-flex items-center gap-1 text-xs mb-4" style={{color:'var(--terra)'}}>
             Get free key at console.groq.com <ExternalLink size={10}/>
           </a>
           <div className="relative mb-4">
@@ -69,14 +69,14 @@ export default function Settings({ onBack, dark }) {
               {testing?'Testing…':'Test & Save'}
             </button>
           </div>
-          {groqSaved&&<p className="flex items-center gap-1.5 text-sm mt-3" style={{color:'#4a8a5d'}}><CheckCircle size={14}/> Saved!</p>}
+          {groqSaved&&<p className="flex items-center gap-1.5 text-sm mt-3" style={{color:'var(--sage)'}}><CheckCircle size={14}/> Saved!</p>}
         </div>
 
         {/* Tavily */}
         <div className="card p-6 mb-4">
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{background:'#e8f0eb',border:'1px solid #ccddd2'}}>
-              <Globe size={14} style={{color:'#4a8a5d'}}/>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{background:'var(--sage-bg)',border:'1px solid var(--sage-bdr)'}}>
+              <Globe size={14} style={{color:'var(--sage)'}}/>
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
@@ -87,9 +87,9 @@ export default function Settings({ onBack, dark }) {
               <p className="text-xs text-ink-400 dark:text-gray-500">Live web search for real trends</p>
             </div>
           </div>
-          <p className="text-xs ml-10 mb-3 text-ink-300 dark:text-gray-600">Free: 1,000 searches/month · <a href="https://tavily.com" target="_blank" rel="noreferrer" style={{color:'#4a8a5d'}}>tavily.com</a></p>
-          <div className="rounded-2xl p-3 mb-4" style={{background:'#e8f0eb',border:'1px solid #ccddd2'}}>
-            <p className="text-xs leading-relaxed" style={{color:'#326944'}}>
+          <p className="text-xs ml-10 mb-3 text-ink-300 dark:text-gray-600">Free: 1,000 searches/month · <a href="https://tavily.com" target="_blank" rel="noreferrer" style={{color:'var(--sage)'}}>tavily.com</a></p>
+          <div className="rounded-2xl p-3 mb-4" style={{background:'var(--sage-bg)',border:'1px solid var(--sage-bdr)'}}>
+            <p className="text-xs leading-relaxed" style={{color:'var(--sage-text)'}}>
               💡 When enabled, Aria searches the web before building your strategy, ideas, scripts, and competitor research — so everything reflects what's actually working <strong>right now</strong>, not just training data.
             </p>
           </div>
@@ -101,7 +101,7 @@ export default function Settings({ onBack, dark }) {
             </button>
           </div>
           <button onClick={saveTavily} disabled={!tavKey.trim()} className="btn-primary w-full py-2.5 text-sm">Save Tavily Key</button>
-          {tavSaved&&<p className="flex items-center gap-1.5 text-sm mt-3" style={{color:'#4a8a5d'}}><CheckCircle size={14}/> Web search enabled!</p>}
+          {tavSaved&&<p className="flex items-center gap-1.5 text-sm mt-3" style={{color:'var(--sage)'}}><CheckCircle size={14}/> Web search enabled!</p>}
         </div>
 
         <div className="card-soft p-5">

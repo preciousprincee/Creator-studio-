@@ -26,103 +26,81 @@ export default function App() {
     generateStrategy, generateScript, generateNewIdeas, generateCompetitors,
   } = useCreator()
 
-  // Apply dark class to <html> — the only place we need to set it
   useEffect(() => {
-    if (dark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
+    if (dark) document.documentElement.classList.add('dark')
+    else      document.documentElement.classList.remove('dark')
     try { localStorage.setItem('aria_dark_mode', String(dark)) } catch {}
   }, [dark])
 
-  // Restore session on mount
   useEffect(() => {
     const saved = loadSaved()
-    if (saved?.profile && saved?.strategy) {
-      restoreSession(saved)
-      setScreen('dashboard')
-    } else {
-      setScreen('onboarding')
-    }
+    if (saved?.profile && saved?.strategy) { restoreSession(saved); setScreen('dashboard') }
+    else setScreen('onboarding')
   }, []) // eslint-disable-line
 
-  // Switch screen as soon as strategy is set
   useEffect(() => {
-    if (strategy && screen === 'onboarding') {
-      setScreen('dashboard')
-    }
+    if (strategy && screen === 'onboarding') setScreen('dashboard')
   }, [strategy]) // eslint-disable-line
 
-  async function handleOnboardingComplete(formData) {
-    await generateStrategy(formData)
-  }
+  async function handleOnboardingComplete(formData) { await generateStrategy(formData) }
+  function handleReset()       { clearSaved(); reset(); setScreen('onboarding') }
+  function goSettings()        { setPrevScreen(screen); setScreen('settings') }
+  function backFromSettings()  { setScreen(prevScreen) }
 
-  function handleReset() { clearSaved(); reset(); setScreen('onboarding') }
-  function goSettings()   { setPrevScreen(screen); setScreen('settings') }
-  function backFromSettings() { setScreen(prevScreen) }
-
-  const hasKey     = !!getApiKey()
-  const hasWebKey  = !!getTavilyKey()
+  const hasKey    = !!getApiKey()
+  const hasWebKey = !!getTavilyKey()
 
   if (screen === 'loading') return (
-    <div style={{minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center',
-      background: dark ? '#030712' : '#fdfaf5'}}>
+    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'var(--bg)'}}>
       <div style={{textAlign:'center'}}>
-        <div style={{width:56, height:56, borderRadius:'50%', background:'linear-gradient(135deg,#f8cfc0,#d9c9a8)',
-          display:'flex', alignItems:'center', justifyContent:'center', fontSize:28, margin:'0 auto 12px',
+        <div style={{width:56,height:56,borderRadius:'50%',background:'linear-gradient(135deg,var(--terra-bg),var(--sand-bg))',
+          display:'flex',alignItems:'center',justifyContent:'center',fontSize:28,margin:'0 auto 12px',
           animation:'bounceSoft 1.4s ease-in-out infinite'}}>✦</div>
-        <p style={{color: dark ? '#6b7280' : '#9e8872', fontSize:14, fontFamily:'monospace'}}>Restoring session…</p>
+        <p style={{color:'var(--text-muted)',fontSize:14,fontFamily:'monospace'}}>Restoring session…</p>
       </div>
     </div>
   )
 
   return (
-    <div style={{minHeight:'100vh', background: dark ? '#030712' : '#fdfaf5', transition:'background 0.3s'}}>
+    <div style={{minHeight:'100vh',background:'var(--bg)',transition:'background 0.3s'}}>
 
-      {/* Floating toolbar — ONLY dark/settings buttons. "New profile" lives inside Dashboard header */}
+      {/* Floating toolbar: ONLY dark toggle + settings icon
+          "New profile" lives inside Dashboard header to avoid overlap */}
       {screen !== 'settings' && (
-        <div style={{position:'fixed', top:16, right:16, zIndex:50, display:'flex', alignItems:'center', gap:8}}>
+        <div style={{position:'fixed',top:16,right:16,zIndex:50,display:'flex',alignItems:'center',gap:8}}>
           {!hasKey && (
             <button onClick={goSettings}
-              style={{fontSize:11, fontFamily:'monospace', borderRadius:999, padding:'4px 10px', cursor:'pointer',
-                background: dark?'#4f180e':'#fce8df', border: `1px solid ${dark?'#8a3320':'#f0a98f'}`,
-                color: dark?'#f0a98f':'#a8432a'}}>
+              style={{fontSize:11,fontFamily:'monospace',borderRadius:999,padding:'4px 10px',cursor:'pointer',
+                background:'var(--terra-bg)',border:'1px solid var(--terra-bdr)',color:'var(--terra-text)'}}>
               Add API key ↗
             </button>
           )}
           {hasKey && hasWebKey && (
-            <span style={{fontSize:10, fontFamily:'monospace', borderRadius:999, padding:'4px 10px',
-              background: dark?'#0f2318':'#e8f0eb', border:`1px solid ${dark?'#326944':'#ccddd2'}`,
-              color: dark?'#a4c4ae':'#326944'}}>
+            <span style={{fontSize:10,fontFamily:'monospace',borderRadius:999,padding:'4px 10px',
+              background:'var(--sage-bg)',border:'1px solid var(--sage-bdr)',color:'var(--sage-text)'}}>
               🌐 web on
             </span>
           )}
-          <button onClick={() => setDark(d => !d)}
-            title={dark?'Light mode':'Dark mode'}
-            style={{width:36, height:36, borderRadius:12, cursor:'pointer', display:'flex',
-              alignItems:'center', justifyContent:'center', transition:'all 0.2s',
-              background: dark?'#1f2937':'#ffffff', border:`1px solid ${dark?'#374151':'#edd9b8'}`,
-              color: dark?'#9ca3af':'#9e8872', boxShadow:'0 1px 3px rgba(100,70,40,0.1)'}}>
+          <button onClick={()=>setDark(d=>!d)} title={dark?'Light mode':'Dark mode'}
+            style={{width:36,height:36,borderRadius:12,cursor:'pointer',display:'flex',
+              alignItems:'center',justifyContent:'center',transition:'all 0.2s',
+              background:'var(--surface)',border:'1px solid var(--border2)',color:'var(--text-muted)'}}>
             {dark ? <Sun size={15}/> : <Moon size={15}/>}
           </button>
           <button onClick={goSettings}
-            style={{width:36, height:36, borderRadius:12, cursor:'pointer', display:'flex',
-              alignItems:'center', justifyContent:'center', transition:'all 0.2s',
-              background: dark?'#1f2937':'#ffffff', border:`1px solid ${dark?'#374151':'#edd9b8'}`,
-              color: dark?'#9ca3af':'#9e8872', boxShadow:'0 1px 3px rgba(100,70,40,0.1)'}}>
+            style={{width:36,height:36,borderRadius:12,cursor:'pointer',display:'flex',
+              alignItems:'center',justifyContent:'center',transition:'all 0.2s',
+              background:'var(--surface)',border:'1px solid var(--border2)',color:'var(--text-muted)'}}>
             <SettingsIcon size={15}/>
           </button>
         </div>
       )}
 
-      {screen === 'settings' && <Settings onBack={backFromSettings} dark={dark} />}
-
+      {screen === 'settings'   && <Settings onBack={backFromSettings}/>}
       {screen === 'onboarding' && (
         <Onboarding onComplete={handleOnboardingComplete} loading={loading}
-          error={error} onClearError={()=>setError(null)} />
+          error={error} onClearError={()=>setError(null)}/>
       )}
-
       {screen === 'dashboard' && profile && strategy && (
         <Dashboard
           profile={profile} strategy={strategy} competitors={competitors}
@@ -132,13 +110,12 @@ export default function App() {
           generateCompetitors={generateCompetitors}
         />
       )}
-
       {screen === 'dashboard' && (!profile || !strategy) && (
-        <div style={{minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:24}}>
-          <div style={{textAlign:'center', maxWidth:320}}>
-            <div style={{fontSize:40, marginBottom:16}}>😕</div>
-            <p className="font-display text-xl text-ink-800 dark:text-gray-200" style={{marginBottom:8}}>Session couldn't load</p>
-            <p className="text-ink-500 dark:text-gray-400 text-sm" style={{marginBottom:24}}>Let's start fresh.</p>
+        <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
+          <div style={{textAlign:'center',maxWidth:320}}>
+            <div style={{fontSize:40,marginBottom:16}}>😕</div>
+            <p className="font-display t1" style={{fontSize:20,marginBottom:8}}>Session couldn't load</p>
+            <p className="tm text-sm" style={{marginBottom:24}}>Let's start fresh.</p>
             <button onClick={handleReset} className="btn-primary">Start over</button>
           </div>
         </div>

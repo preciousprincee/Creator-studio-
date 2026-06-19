@@ -2,167 +2,210 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── CSS variables for theming — one source of truth ─── */
+:root {
+  --bg:         #fdfaf5;
+  --bg2:        #faf4e8;
+  --bg3:        #f5ebd4;
+  --surface:    #ffffff;
+  --surface2:   #faf4e8;
+  --border:     #f5ebd4;
+  --border2:    #edd9b8;
+  --text-1:     #1c1612;
+  --text-2:     #44392e;
+  --text-3:     #7a6655;
+  --text-muted: #9e8872;
+  --text-faint: #c4b09a;
+  --terra:      #e07a5f;
+  --terra-bg:   #fce8df;
+  --terra-bdr:  #f0a98f;
+  --terra-text: #a8432a;
+  --sage:       #4a8a5d;
+  --sage-bg:    #e8f0eb;
+  --sage-bdr:   #a4c4ae;
+  --sage-text:  #326944;
+  --sand-bg:    #f5f0e8;
+  --sand-bdr:   #d9c9a8;
+  --sand-text:  #a6884e;
+}
+
+html.dark {
+  --bg:         #030712;
+  --bg2:        #0d1117;
+  --bg3:        #111827;
+  --surface:    #111827;
+  --surface2:   #1f2937;
+  --border:     #1f2937;
+  --border2:    #374151;
+  --text-1:     #f9fafb;
+  --text-2:     #e5e7eb;
+  --text-3:     #9ca3af;
+  --text-muted: #6b7280;
+  --text-faint: #4b5563;
+  --terra:      #e07a5f;
+  --terra-bg:   #2d1410;
+  --terra-bdr:  #7c2d12;
+  --terra-text: #fca98f;
+  --sage:       #4a8a5d;
+  --sage-bg:    #052e16;
+  --sage-bdr:   #166534;
+  --sage-text:  #86efac;
+  --sand-bg:    #1c1a14;
+  --sand-bdr:   #44391e;
+  --sand-text:  #d4a84b;
+}
+
 @layer base {
-  html { background: #fdfaf5; }
-  html.dark { background: #030712; }
+  html { background: var(--bg); }
   body {
+    background-color: var(--bg);
+    color: var(--text-1);
     font-family: 'Plus Jakarta Sans', sans-serif;
     -webkit-font-smoothing: antialiased;
-    @apply text-ink-900 dark:text-gray-100;
-    background-color: #fdfaf5;
   }
-  .dark body { background-color: #030712; }
-  * { scrollbar-width: thin; scrollbar-color: #d9c9a8 #f5ebd4; }
-  .dark * { scrollbar-color: #374151 #111827; }
+  * { scrollbar-width: thin; scrollbar-color: var(--border2) var(--bg2); }
   *::-webkit-scrollbar { width: 5px; }
-  *::-webkit-scrollbar-track { background: #f5ebd4; }
-  .dark *::-webkit-scrollbar-track { background: #111827; }
-  *::-webkit-scrollbar-thumb { background: #d9c9a8; border-radius: 10px; }
-  .dark *::-webkit-scrollbar-thumb { background: #374151; }
+  *::-webkit-scrollbar-track { background: var(--bg2); }
+  *::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-terra-400 hover:bg-terra-500 text-white font-semibold rounded-2xl px-6 py-3 text-sm
-           transition-all duration-200 shadow-warm hover:shadow-warm-lg
+    background-color: var(--terra);
+    color: white;
+    @apply font-semibold rounded-2xl px-6 py-3 text-sm transition-all duration-200
            disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98];
+    box-shadow: 0 4px 16px rgba(100,70,40,0.10);
   }
+  .btn-primary:hover { background-color: #c95f43; box-shadow: 0 8px 32px rgba(100,70,40,0.12); }
+
   .btn-secondary {
+    background-color: var(--surface2);
+    color: var(--text-2);
+    border: 1px solid var(--border2);
     @apply font-semibold rounded-2xl px-6 py-3 text-sm transition-all duration-200
            disabled:opacity-40 active:scale-[0.98];
-    background-color: #faf4e8;
-    color: #44392e;
-    border: 1px solid #edd9b8;
   }
-  .dark .btn-secondary {
-    background-color: #1f2937;
-    color: #e5e7eb;
-    border-color: #374151;
-  }
-  .btn-secondary:hover { background-color: #f5ebd4; }
-  .dark .btn-secondary:hover { background-color: #374151; }
+  .btn-secondary:hover { background-color: var(--bg3); }
 
-  /* card uses explicit CSS so dark: opacity modifiers never interfere */
   .card {
-    background-color: #ffffff;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 1.5rem;
-    border: 1px solid #f5ebd4;
-    box-shadow: 0 4px 16px rgba(100,70,40,0.10), 0 1px 4px rgba(100,70,40,0.06);
+    box-shadow: 0 4px 16px rgba(100,70,40,0.06);
   }
-  .dark .card {
-    background-color: #111827;
-    border-color: #1f2937;
-    box-shadow: none;
-  }
+  .dark .card { box-shadow: none; }
+
   .card-soft {
+    background-color: var(--bg2);
+    border: 1px solid var(--border);
     border-radius: 1.5rem;
-    border: 1px solid #f5ebd4;
-    background-color: #fdfaf5;
-  }
-  .dark .card-soft {
-    background-color: #111827;
-    border-color: #1f2937;
   }
 
-  /* sticky header — plain rgba avoids Tailwind opacity-modifier issues */
-  .header-bg {
-    background-color: rgba(253,250,245,0.97);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-  .dark .header-bg {
-    background-color: rgba(3,7,18,0.97);
+  /* Header — plain rgba for opacity blur */
+  .header-bg { background-color: var(--bg); }
+  @supports (backdrop-filter: blur(12px)) {
+    .header-bg {
+      background-color: transparent;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .header-bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-color: var(--bg);
+      opacity: 0.96;
+      z-index: -1;
+    }
   }
 
   .input {
-    background-color: #ffffff;
-    border: 1px solid #edd9b8;
+    background-color: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--text-2);
     border-radius: 1rem;
     padding: 12px 16px;
     font-size: 0.875rem;
     width: 100%;
     outline: none;
     transition: border-color 0.2s;
-    @apply text-ink-800 placeholder-ink-300;
   }
-  .dark .input {
-    background-color: #1f2937;
-    border-color: #374151;
-    @apply text-gray-200 placeholder-gray-600;
-  }
-  .input:focus { border-color: #e07a5f; }
-  .dark .input:focus { border-color: #c95f43; }
+  .input::placeholder { color: var(--text-faint); }
+  .input:focus { border-color: var(--terra); }
 
   .label-tag {
-    @apply text-[10px] font-mono uppercase tracking-widest text-ink-400 dark:text-gray-500;
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    display: block;
   }
+
   .chip {
     padding: 6px 12px;
     border-radius: 9999px;
     font-size: 0.875rem;
-    border: 1px solid;
+    border: 1px solid var(--border2);
     cursor: pointer;
     transition: all 0.15s;
     user-select: none;
-    background-color: #ffffff;
-    border-color: #edd9b8;
-    color: #5c4d40;
+    background-color: var(--surface);
+    color: var(--text-3);
   }
-  .dark .chip {
-    background-color: #1f2937;
-    border-color: #374151;
-    color: #d1d5db;
-  }
-  .chip:hover { border-color: #f0a98f; color: #c95f43; }
+  .chip:hover { border-color: var(--terra-bdr); color: var(--terra); }
   .chip.active {
-    background-color: #fce8df;
-    border-color: #f0a98f;
-    color: #a8432a;
+    background-color: var(--terra-bg);
+    border-color: var(--terra-bdr);
+    color: var(--terra-text);
     font-weight: 500;
-  }
-  .dark .chip.active {
-    background-color: #4f180e;
-    border-color: #8a3320;
-    color: #f0a98f;
   }
 
   .aria-bubble {
-    background-color: #ffffff;
-    border: 1px solid #f5ebd4;
+    background-color: var(--surface2);
+    border: 1px solid var(--border);
     border-radius: 1.5rem;
     border-top-left-radius: 0.25rem;
     padding: 16px 20px;
-    box-shadow: 0 1px 3px rgba(100,70,40,0.08);
     font-size: 0.875rem;
     line-height: 1.6;
-    @apply text-ink-700;
-  }
-  .dark .aria-bubble {
-    background-color: #1f2937;
-    border-color: #374151;
-    @apply text-gray-300;
+    color: var(--text-2);
   }
 
-  .tab-active  { @apply bg-terra-400 text-white; box-shadow: 0 1px 3px rgba(100,70,40,0.15); }
-  .tab-idle    { @apply text-ink-500 dark:text-gray-400 hover:text-ink-700 dark:hover:text-gray-200; }
-  .dark .tab-idle:hover { background-color: #1f2937; }
-  .tab-idle:hover { background-color: #faf4e8; }
+  .tab-active  { background-color: var(--terra); color: white; }
+  .tab-idle    { color: var(--text-muted); }
+  .tab-idle:hover { background-color: var(--surface2); color: var(--text-2); }
+
+  /* Reusable tinted blocks — use CSS vars so they auto-flip in dark */
+  .block-terra  { background-color: var(--terra-bg); border: 1px solid var(--terra-bdr); }
+  .block-sage   { background-color: var(--sage-bg);  border: 1px solid var(--sage-bdr);  }
+  .block-sand   { background-color: var(--sand-bg);  border: 1px solid var(--sand-bdr);  }
+  .block-base   { background-color: var(--surface2); border: 1px solid var(--border2);   }
 }
 
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes fadeUp   { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn   { from{opacity:0} to{opacity:1} }
   @keyframes bounceSoft { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
-  @keyframes spin { to{transform:rotate(360deg)} }
+  @keyframes spin     { to{transform:rotate(360deg)} }
   @keyframes dotTyping { 0%,100%{content:'.'} 33%{content:'..'} 66%{content:'...'} }
-  .animate-fade-up { animation: fadeUp 0.45s ease forwards; }
-  .animate-fade-in { animation: fadeIn 0.3s ease forwards; }
-  .animate-bounce-soft { animation: bounceSoft 1.4s ease-in-out infinite; }
-  .animate-spin { animation: spin 0.8s linear infinite; }
-  .dot-typing::after { content:'.'; animation: dotTyping 1s steps(1) infinite; }
-  .shadow-warm-sm { box-shadow: 0 1px 3px rgba(100,70,40,0.08),0 1px 2px rgba(100,70,40,0.06); }
-  .shadow-warm    { box-shadow: 0 4px 16px rgba(100,70,40,0.10),0 1px 4px rgba(100,70,40,0.06); }
-  .shadow-warm-lg { box-shadow: 0 8px 32px rgba(100,70,40,0.12),0 2px 8px rgba(100,70,40,0.08); }
+  .animate-fade-up    { animation: fadeUp 0.45s ease forwards; }
+  .animate-fade-in    { animation: fadeIn 0.3s ease forwards; }
+  .animate-bounce-soft{ animation: bounceSoft 1.4s ease-in-out infinite; }
+  .animate-spin       { animation: spin 0.8s linear infinite; }
+  .dot-typing::after  { content:'.'; animation: dotTyping 1s steps(1) infinite; }
+  .shadow-warm-sm     { box-shadow: 0 1px 3px rgba(100,70,40,0.08),0 1px 2px rgba(100,70,40,0.06); }
+  .shadow-warm        { box-shadow: 0 4px 16px rgba(100,70,40,0.10),0 1px 4px rgba(100,70,40,0.06); }
+  .shadow-warm-lg     { box-shadow: 0 8px 32px rgba(100,70,40,0.12),0 2px 8px rgba(100,70,40,0.08); }
+  .t1 { color: var(--text-1); }
+  .t2 { color: var(--text-2); }
+  .t3 { color: var(--text-3); }
+  .tm { color: var(--text-muted); }
+  .tf { color: var(--text-faint); }
+  .c-terra { color: var(--terra-text); }
+  .c-sage  { color: var(--sage-text); }
+  .c-sand  { color: var(--sand-text); }
 }
