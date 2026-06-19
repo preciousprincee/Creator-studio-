@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Key, Globe, ExternalLink, Eye, EyeOff, CheckCircle } from 'lucide-react'
+import { Key, Globe, ExternalLink, Eye, EyeOff, CheckCircle, RotateCcw } from 'lucide-react'
 import { getApiKey, getTavilyKey } from '../lib/groq'
 import { BackButton, ErrorBanner } from './UI'
 
-export default function Settings({ onBack, dark }) {
+export default function Settings({ onBack, dark, onReset }) {
   const [groqKey,   setGroqKey]  = useState(getApiKey())
   const [tavKey,    setTavKey]   = useState(getTavilyKey())
   const [showG,     setShowG]    = useState(false)
@@ -12,6 +12,7 @@ export default function Settings({ onBack, dark }) {
   const [tavSaved,  setTavSaved] = useState(false)
   const [testing,   setTesting]  = useState(false)
   const [groqErr,   setGroqErr]  = useState(null)
+  const [confirmReset, setConfirmReset] = useState(false)
 
   async function testAndSaveGroq() {
     setTesting(true); setGroqErr(null)
@@ -70,6 +71,30 @@ export default function Settings({ onBack, dark }) {
             </button>
           </div>
           {groqSaved&&<p className="flex items-center gap-1.5 text-sm mt-3" style={{color:'var(--sage)'}}><CheckCircle size={14}/> Saved!</p>}
+        </div>
+
+        {/* New profile / reset */}
+        <div className="card p-6 mb-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{background:'#fbe9e7',border:'1px solid #f3c9c4'}}>
+              <RotateCcw size={14} style={{color:'#c0463a'}}/>
+            </div>
+            <div className="flex-1">
+              <p className="font-display text-base text-ink-800 dark:text-gray-200">New Profile</p>
+              <p className="text-xs text-ink-400 dark:text-gray-500">Clear your current profile and start fresh</p>
+            </div>
+          </div>
+          {!confirmReset ? (
+            <button onClick={()=>setConfirmReset(true)} className="btn-secondary w-full py-2.5 text-sm mt-3">
+              Start a new profile
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 mt-3">
+              <span className="text-xs tm flex-1">Reset and lose current data?</span>
+              <button onClick={onReset} className="text-xs px-3 py-2 rounded-xl" style={{color:'#ef4444',border:'1px solid #fca5a5'}}>Yes, reset</button>
+              <button onClick={()=>setConfirmReset(false)} className="text-xs px-3 py-2 rounded-xl tm" style={{border:'1px solid var(--border2)'}}>Cancel</button>
+            </div>
+          )}
         </div>
 
         {/* Tavily */}

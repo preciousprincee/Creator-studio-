@@ -150,7 +150,6 @@ function CompetitorCard({ c }) {
 
 export default function Dashboard({ profile, strategy, competitors, webUsed, onReset, scripts, loadingNewIdeas, loadingCompetitors, generateScript, generateNewIdeas, generateCompetitors }) {
   const [activeTab, setActiveTab] = useState('overview')
-  const [confirmReset, setConfirmReset] = useState(false)
 
   const tabs = [
     {id:'overview',    label:'Overview',    emoji:'✦'},
@@ -184,23 +183,7 @@ export default function Dashboard({ profile, strategy, competitors, webUsed, onR
             </div>
           </div>
 
-          {/* Status badges + New Profile — these live ONLY here, not in the floating toolbar */}
-          <div className="flex items-center gap-2 shrink-0">
-            {webUsed && <WebBadge/>}
-            {!confirmReset ? (
-              <button onClick={()=>setConfirmReset(true)}
-                className="text-xs px-3 py-1.5 rounded-xl tm hover:t2 transition-colors"
-                style={{border:'1px solid var(--border2)'}}>
-                New profile
-              </button>
-            ) : (
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs tm hidden sm:inline">Reset?</span>
-                <button onClick={onReset} className="text-xs px-2.5 py-1.5 rounded-xl" style={{color:'#ef4444',border:'1px solid #fca5a5'}}>Yes</button>
-                <button onClick={()=>setConfirmReset(false)} className="text-xs px-2.5 py-1.5 rounded-xl tm" style={{border:'1px solid var(--border2)'}}>No</button>
-              </div>
-            )}
-          </div>
+          {webUsed && <div className="shrink-0"><WebBadge/></div>}
         </div>
 
         {/* Row 2: Tab bar */}

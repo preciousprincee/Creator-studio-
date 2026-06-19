@@ -96,7 +96,7 @@ export default function App() {
         </div>
       )}
 
-      {screen === 'settings'   && <Settings onBack={backFromSettings}/>}
+      {screen === 'settings'   && <Settings onBack={backFromSettings} onReset={handleReset} dark={dark}/>}
       {screen === 'onboarding' && (
         <Onboarding onComplete={handleOnboardingComplete} loading={loading}
           error={error} onClearError={()=>setError(null)}/>
